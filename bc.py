@@ -41,13 +41,16 @@ def evaluate_operators(string):
     var_str = ""
     for s in string:
         # Checking if char encountered is a variable
-        # FIXME - vars can be multiple char words
-        # TODO - Should probably throw an error if the variable isn't present in the dict
         if s.isalpha():
             var_str += s
             continue
-        # else:
-        #     nums.append(state[var_str])
+        if var_str in state:
+            nums.append(state[var_str])
+            var_str = ""
+        elif var_str not in state and var_str != "":
+            state[var_str] = 0.0
+            nums.append(state[var_str])
+            var_str = ""
         # Checking if char encountered is a number
         if s.isdigit() or s == ".":
             num_str += s
@@ -64,15 +67,15 @@ def evaluate_operators(string):
                     apply_operation(nums, ops)
                 # Adding all operations to ops list
                 ops.append(s)
-    if var_str in state:
+    if var_str not in state and var_str != "":
+        state[var_str] = 0.0
         nums.append(state[var_str])
-    elif var_str not in state and var_str != "":
-        nums.append(state[var_str])
+        var_str = ""
     if num_str != "":
         nums.append(float(num_str))
     while ops:
         apply_operation(nums, ops)
-    # After all operations performed, return the only element left in the list
+    # After all operations performed, return the only element left in the nums list
     return nums[0]
 
 
@@ -82,8 +85,6 @@ def precedence(op):
         return 3
     elif op in "/%*":
         return 2
-    # elif op in "*":
-    #     return 2
     elif op in "+-":
         return 1
     else:
