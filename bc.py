@@ -8,7 +8,16 @@ state = {}
 
 # Evaluates any expression given
 def evaluate(exp):
-    exp = exp.replace(" ", "")
+    left_count = 0
+    right_count = 0
+    for e in exp:
+        if e == "(":
+            left_count += 1
+        if e == ")":
+            right_count += 1
+    if left_count != right_count:
+        return "parse error"
+
     # Makes sure there are no brackets in the given expression
     if "(" not in exp and ")" not in exp:
         # Evaluating operators incase expression has no brackets
@@ -41,6 +50,8 @@ def evaluate_operators(string):
     var_str = ""
     for s in string:
         # Checking if char encountered is a variable
+        if s == " ":
+            continue
         if s.isalpha():
             var_str += s
             continue
@@ -64,9 +75,17 @@ def evaluate_operators(string):
                 # Checking precedence of operators, starting from highest priority
                 while ops and precedence(s) <= precedence(ops[-1]):
                     # Actually performing the operations
-                    apply_operation(nums, ops)
+                    try:
+                        apply_operation(nums, ops)
+                    except IndexError:
+                        return "parse error"
+                    except ZeroDivisionError:
+                        return "divide by zero"
                 # Adding all operations to ops list
                 ops.append(s)
+    if var_str in state:
+        nums.append(state[var_str])
+        var_str = ""
     if var_str not in state and var_str != "":
         state[var_str] = 0.0
         nums.append(state[var_str])
@@ -74,7 +93,12 @@ def evaluate_operators(string):
     if num_str != "":
         nums.append(float(num_str))
     while ops:
-        apply_operation(nums, ops)
+        try:
+            apply_operation(nums, ops)
+        except IndexError:
+            return "parse error"
+        except ZeroDivisionError:
+            return "divide by zero"
     # After all operations performed, return the only element left in the nums list
     return nums[0]
 
