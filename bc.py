@@ -8,12 +8,12 @@ state = {}
 
 # Evaluates any expression given
 def evaluate(exp):
+    exp = exp.replace(" ", "")
     # Makes sure there are no brackets in the given expression
     if "(" not in exp and ")" not in exp:
         # Evaluating operators incase expression has no brackets
         return evaluate_operators(exp)
 
-    exp = exp.replace(" ", "")  # 2+6/10
     curr_string = ""
     # Extracting contents of innermost bracket pair
     for e in exp:
@@ -38,16 +38,22 @@ def evaluate_operators(string):
     nums = []
     ops = []
     num_str = ""
+    var_str = ""
     for s in string:
         # Checking if char encountered is a variable
         # FIXME - vars can be multiple char words
+        # TODO - Should probably throw an error if the variable isn't present in the dict
         if s.isalpha():
-            nums.append(state[s])
-            # TODO - Should probably throw an error if the variable isn't present in the dict
+            var_str += s
+            continue
         # Checking if char encountered is a number
-        elif s.isdigit() or s == ".":
+        if s.isdigit() or s == ".":
             num_str += s
         else:
+            if var_str in state:
+                nums.append(state[var_str])
+            elif var_str not in state:
+                nums.append(state[var_str])
             # Adding number to nums list
             if num_str != "":
                 nums.append(float(num_str))
