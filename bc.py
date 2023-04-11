@@ -46,14 +46,12 @@ def evaluate_operators(string):
         if s.isalpha():
             var_str += s
             continue
+        # else:
+        #     nums.append(state[var_str])
         # Checking if char encountered is a number
         if s.isdigit() or s == ".":
             num_str += s
         else:
-            if var_str in state:
-                nums.append(state[var_str])
-            elif var_str not in state:
-                nums.append(state[var_str])
             # Adding number to nums list
             if num_str != "":
                 nums.append(float(num_str))
@@ -66,6 +64,10 @@ def evaluate_operators(string):
                     apply_operation(nums, ops)
                 # Adding all operations to ops list
                 ops.append(s)
+    if var_str in state:
+        nums.append(state[var_str])
+    elif var_str not in state and var_str != "":
+        nums.append(state[var_str])
     if num_str != "":
         nums.append(float(num_str))
     while ops:
