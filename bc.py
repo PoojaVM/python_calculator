@@ -14,37 +14,68 @@ decrement_list = []
 def evaluate(exp):
 
     var = ""
+    # ++x
+    if exp[0] == "+" and exp[1] == "+":
+        for j in range(2, len(exp)):
+            if exp[j].isalpha():
+                var += exp[j]
+                if not exp[j + 1].isalpha():
+                    break
+        if var != "":
+            if var in state:
+                state[var] += 1.0
+                var = ""
+            elif var not in state:
+                state[var] = 1.0
+                var = ""
+        exp = exp[2:]
+
     if len(exp) >= 3:
         for i in range(len(exp)):
-            if exp[i - 2] in " /%*^" and exp[i - 1] == "+" and exp[i] == "+":
+            if exp[i - 2] in " /%*^-" and exp[i - 1] == "+" and exp[i] == "+":
                 for j in range(i, len(exp)):
                     if exp[j].isalpha():
                         var += exp[j]
                 if var != "":
                     if var in state:
-                        increment_list.append(var)
+                        state[var] += 1.0
                     elif var not in state:
-                        state[var] = 0.0
-                        increment_list.append(var)
+                        state[var] = 1.0
                 exp = exp[: i - 1] + " " + exp[i + 1:]
                 i -= 1
             i += 1
 
+    # --x
+    if exp[0] == "-" and exp[1] == "-":
+        for j in range(2, len(exp)):
+            if exp[j].isalpha():
+                var += exp[j]
+                if not exp[j + 1].isalpha():
+                    break
+        if var != "":
+            if var in state:
+                state[var] -= 1.0
+                var = ""
+            elif var not in state:
+                state[var] = -1.0
+                var = ""
+        exp = exp[2:]
+
     if len(exp) >= 3:
         for i in range(len(exp)):
-            if exp[i - 2] in " /%*^" and exp[i - 1] == "-" and exp[i] == "-":
+            if exp[i - 2] in " /%*^+" and exp[i - 1] == "-" and exp[i] == "-":
                 for j in range(i, len(exp)):
                     if exp[j].isalpha():
                         var += exp[j]
                 if var != "":
                     if var in state:
-                        decrement_list.append(var)
+                        state[var] -= 1.0
                     elif var not in state:
-                        state[var] = 0.0
-                        decrement_list.append(var)
+                        state[var] = -1.0
                 exp = exp[: i - 1] + " " + exp[i + 1:]
                 i -= 1
             i += 1
+    # x++
 
     left_count = 0
     right_count = 0
@@ -98,11 +129,15 @@ def evaluate_operators(string):
                 state[var_str] += 1
                 nums.append(state[var_str])
                 increment_list.remove(var_str)
-            if var_str in decrement_list:
+                var_str = ""
+            elif var_str in decrement_list:
                 state[var_str] -= 1
                 nums.append(state[var_str])
                 decrement_list.remove(var_str)
-            var_str = ""
+                var_str = ""
+            else:
+                nums.append(state[var_str])
+                var_str = ""
         elif var_str not in state and var_str != "":
             state[var_str] = 0.0
             nums.append(state[var_str])
@@ -133,11 +168,15 @@ def evaluate_operators(string):
             state[var_str] += 1
             nums.append(state[var_str])
             increment_list.remove(var_str)
-        if var_str in decrement_list:
+            var_str = ""
+        elif var_str in decrement_list:
             state[var_str] -= 1
             nums.append(state[var_str])
             decrement_list.remove(var_str)
-        var_str = ""
+            var_str = ""
+        else:
+            nums.append(state[var_str])
+            var_str = ""
     if var_str not in state and var_str != "":
         state[var_str] = 0.0
         nums.append(state[var_str])
@@ -218,3 +257,18 @@ try:
 except Exception as e:
     # TODO - Check what all exceptions are to be handled
     print("Some error occurred. Please retry. Goodbye!", e)
+
+
+# """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+# for j in range(i, len(exp)):
+#     if exp[j].isalpha():
+#         var += exp[j]
+# if var != "":
+#     if var in state:
+#         increment_list.append(var)
+#     elif var not in state:
+#         state[var] = 0.0
+#         increment_list.append(var)
+# exp = exp[: i - 1] + " " + exp[i + 1:]
+# i -= 1
+# i += 1
