@@ -24,9 +24,11 @@ def evaluate(exp):
         if var != "":
             if var in state:
                 state[var] += 1.0
+                exp = exp.replace(var, str(state[var]), 1)
                 var = ""
             elif var not in state:
                 state[var] = 1.0
+                exp = exp.replace(var, str(state[var]), 1)
                 var = ""
         exp = exp[2:]
 
@@ -39,8 +41,10 @@ def evaluate(exp):
                 if var != "":
                     if var in state:
                         state[var] += 1.0
+                        exp = exp.replace(var, str(state[var]), 1)
                     elif var not in state:
                         state[var] = 1.0
+                        exp = exp.replace(var, str(state[var]), 1)
                 exp = exp[: i - 1] + " " + exp[i + 1:]
                 i -= 1
             i += 1
@@ -55,9 +59,11 @@ def evaluate(exp):
         if var != "":
             if var in state:
                 state[var] -= 1.0
+                exp = exp.replace(var, str(state[var]), 1)
                 var = ""
             elif var not in state:
                 state[var] = -1.0
+                exp = exp.replace(var, str(state[var]), 1)
                 var = ""
         exp = exp[2:]
 
@@ -70,8 +76,10 @@ def evaluate(exp):
                 if var != "":
                     if var in state:
                         state[var] -= 1.0
+                        exp = exp.replace(var, str(state[var]), 1)
                     elif var not in state:
                         state[var] = -1.0
+                        exp = exp.replace(var, str(state[var]), 1)
                 exp = exp[: i - 1] + " " + exp[i + 1:]
                 i -= 1
             i += 1
@@ -230,6 +238,7 @@ def print_output():
     for output in outputs:
         print(output)
 
+
 # Driver Code - Takes input from command line and calls functions to process and output it
 try:
     for input in sys.stdin:
@@ -241,7 +250,7 @@ try:
                 output = ""
                 for var in output_vars:
                     var = var.strip()
-                    space = ' ' if output else ''
+                    space = " " if output else ""
                     if var in state:
                         output = f"{output}{space}{state[var]}"
                     elif var.isdigit():
@@ -261,7 +270,7 @@ try:
             elif len(input) == 2:
                 lhs, rhs = input[0].strip(), input[1].strip()
                 # Ignore cases where there is space in the middle anywhere in LHS since it is not valid
-                if ' ' not in lhs:
+                if " " not in lhs:
                     state[lhs] = evaluate(rhs)
     # Goes here with there is EOFError or KeyboardInterrupt
     print_output()
