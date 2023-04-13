@@ -19,7 +19,7 @@ def evaluate(exp):
         for j in range(2, len(exp)):
             if exp[j].isalpha():
                 var += exp[j]
-                if not exp[j + 1].isalpha():
+                if len(exp) > 3 and not exp[j + 1].isalpha():
                     break
         if var != "":
             if var in state:
@@ -54,7 +54,7 @@ def evaluate(exp):
         for j in range(2, len(exp)):
             if exp[j].isalpha():
                 var += exp[j]
-                if not exp[j + 1].isalpha():
+                if len(exp) > 3 and not exp[j + 1].isalpha():
                     break
         if var != "":
             if var in state:
