@@ -230,27 +230,39 @@ def print_output():
     for output in outputs:
         print(output)
 
-
-# Takes input from command line and calls functions to process or output it
-# Driver Code
+# Driver Code - Takes input from command line and calls functions to process and output it
 try:
     for input in sys.stdin:
         input = " ".join(input.split())
         if "print" in input:
             input = input.split(" ", 1)
-            # TODO - handle validations
-            output_vars = input[1].split(", ")
-            output = ""
-            for var in output_vars:
-                output = f"{output} {state[var]}"
+            if len(input) == 2:
+                output_vars = input[1].split(",")
+                output = ""
+                for var in output_vars:
+                    var = var.strip()
+                    space = ' ' if output else ''
+                    if var in state:
+                        output = f"{output}{space}{state[var]}"
+                    elif var.isdigit():
+                        output = f"{output}{space}{float(var)}"
+                    elif var.isalpha():
+                        # Not storing in state since we are printing and exiting
+                        output = f"{output}{space}0.0"
                 outputs.append(output)
+            else:
+                # TODO - Handle case - user passes 'print' without any vars or wrong format
+                pass
         else:
-            input = input.split(" = ", 1)
+            input = input.split("=", 1)
             if len(input) == 1:
-                # TODO - check if it is variable declaration and default it to 0 if value not provided. Otherwise, throw error
+                # Case 'x or x=', passed since this will be verified at the time of print and displayed
                 pass
             elif len(input) == 2:
-                state[input[0]] = evaluate(input[1])
+                lhs, rhs = input[0].strip(), input[1].strip()
+                # Ignore cases where there is space in the middle anywhere in LHS since it is not valid
+                if ' ' not in lhs:
+                    state[lhs] = evaluate(rhs)
     # Goes here with there is EOFError or KeyboardInterrupt
     print_output()
 
