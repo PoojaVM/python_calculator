@@ -5,9 +5,47 @@ outputs = []
 # Holds latest values of variables
 state = {}
 
+increment_list = []
+decrement_list = []
 
 # Evaluates any expression given
+
+
 def evaluate(exp):
+
+    var = ""
+    if len(exp) >= 3:
+        for i in range(len(exp)):
+            if exp[i - 2] in " /%*^" and exp[i - 1] == "+" and exp[i] == "+":
+                for j in range(i, len(exp)):
+                    if exp[j].isalpha():
+                        var += exp[j]
+                if var != "":
+                    if var in state:
+                        increment_list.append(var)
+                    elif var not in state:
+                        state[var] = 0.0
+                        increment_list.append(var)
+                exp = exp[: i - 1] + " " + exp[i + 1:]
+                i -= 1
+            i += 1
+
+    if len(exp) >= 3:
+        for i in range(len(exp)):
+            if exp[i - 2] in " /%*^" and exp[i - 1] == "-" and exp[i] == "-":
+                for j in range(i, len(exp)):
+                    if exp[j].isalpha():
+                        var += exp[j]
+                if var != "":
+                    if var in state:
+                        decrement_list.append(var)
+                    elif var not in state:
+                        state[var] = 0.0
+                        decrement_list.append(var)
+                exp = exp[: i - 1] + " " + exp[i + 1:]
+                i -= 1
+            i += 1
+
     left_count = 0
     right_count = 0
     for e in exp:
@@ -56,7 +94,14 @@ def evaluate_operators(string):
             var_str += s
             continue
         if var_str in state:
-            nums.append(state[var_str])
+            if var_str in increment_list:
+                state[var_str] += 1
+                nums.append(state[var_str])
+                increment_list.remove(var_str)
+            if var_str in decrement_list:
+                state[var_str] -= 1
+                nums.append(state[var_str])
+                decrement_list.remove(var_str)
             var_str = ""
         elif var_str not in state and var_str != "":
             state[var_str] = 0.0
@@ -84,7 +129,14 @@ def evaluate_operators(string):
                 # Adding all operations to ops list
                 ops.append(s)
     if var_str in state:
-        nums.append(state[var_str])
+        if var_str in increment_list:
+            state[var_str] += 1
+            nums.append(state[var_str])
+            increment_list.remove(var_str)
+        if var_str in decrement_list:
+            state[var_str] -= 1
+            nums.append(state[var_str])
+            decrement_list.remove(var_str)
         var_str = ""
     if var_str not in state and var_str != "":
         state[var_str] = 0.0
