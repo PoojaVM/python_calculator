@@ -45,9 +45,7 @@ def evaluate(exp):
                     elif var not in state:
                         state[var] = 1.0
                         exp = exp.replace(var, str(state[var]), 1)
-                exp = exp[: i - 1] + " " + exp[i + 1:]
-                i -= 1
-            i += 1
+                    exp = exp.replace("++", "", 1)
 
     # --x
     if exp[0] == "-" and exp[1] == "-":
@@ -80,10 +78,51 @@ def evaluate(exp):
                     elif var not in state:
                         state[var] = -1.0
                         exp = exp.replace(var, str(state[var]), 1)
-                exp = exp[: i - 1] + " " + exp[i + 1:]
-                i -= 1
-            i += 1
+                    exp = exp.replace("++", "", 1)
+
     # x++
+    if len(exp) >= 3:
+        var = ""
+        for i, s in enumerate(exp):
+            if s.isalpha():
+                var += s
+                if (
+                    len(exp) >= i + 3
+                    and exp[i + 1] == "+"
+                    and exp[i + 2] == "+"
+                    and var != ""
+                ):
+                    if var in state:
+                        exp = exp.replace(var, str(state[var]), 1)
+                        state[var] += 1.0
+                    else:
+                        state[var] = 0.0
+                        exp = exp.replace(var, str(state[var]), 1)
+                        state[var] += 1.0
+                    var = ""
+        exp = exp.replace("++", "")
+
+    # x--
+    if len(exp) >= 3:
+        var = ""
+        for i, s in enumerate(exp):
+            if s.isalpha():
+                var += s
+                if (
+                    len(exp) >= i + 3
+                    and exp[i + 1] == "-"
+                    and exp[i + 2] == "-"
+                    and var != ""
+                ):
+                    if var in state:
+                        exp = exp.replace(var, str(state[var]), 1)
+                        state[var] -= 1.0
+                    else:
+                        state[var] = 0.0
+                        exp = exp.replace(var, str(state[var]), 1)
+                        state[var] -= 1.0
+                    var = ""
+        exp = exp.replace("--", "")
 
     left_count = 0
     right_count = 0
