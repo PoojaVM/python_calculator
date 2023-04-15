@@ -1,3 +1,4 @@
+import re
 import sys
 
 # Holds all outputs to print
@@ -297,38 +298,55 @@ try:
                     elif var.isalpha():
                         # Not storing in state since we are printing and exiting
                         output = f"{output}{space}0.0"
+                    else:
+                        # +\-*/%^
+                        match = re.search('[+|\-|*|/|%|^]', var)
+                        if match is not None:
+                            op = match.group()
+                            exp = var.split(op)
+                            # Ensure expression is valid
+                            if len(exp) > 0:
+                                output = f"{output}{space}{evaluate(var)}"
                 outputs.append(output)
             else:
                 # TODO - Handle case - user passes 'print' without any vars or wrong format
                 pass
         else:
-            input = input.split("=", 1)
-            if len(input) == 1:
-                # Case 'x or x=', passed since this will be verified at the time of print and displayed
-                pass
-            elif len(input) == 2:
-                lhs, rhs = input[0].strip(), input[1].strip()
+            temp_input = re.split('[+\-*/%^]=', input)
+            if len(temp_input) == 2:
+                op = input[input.index('=') - 1]
+                lhs, rhs = temp_input[0].strip(), temp_input[1].strip()
                 # Ignore cases where there is space in the middle anywhere in LHS since it is not valid
-                if " " not in lhs:
-                    state[lhs] = evaluate(rhs)
+                if ' ' not in lhs:
+                    state[lhs] = evaluate(f'{lhs} {op} {rhs}')
+            # TODO - Implement compare extension and handle equal to case
+            # elif '=' in input:
+            #     # ==, <=, >=, !=, <, >
+            #     match = re.search('==|<=|>=|!=|<|>]', var)
+            #     if match is not None:
+            #         com
+
+            else:
+                input = input.split("=", 1)
+                if len(input) == 1 and ('++' in input[0] or '--' in input[0]):
+                    op = '++' if '++' in input[0] else '--'
+                    exp = input[0].split(op)
+                    if len(exp) > 0:
+                        lhs = exp[0] if exp[0] != '' else exp[1]
+                        evaluate(input[0])
+                    # if '++' in input[0]:
+                    #     exp = input[0].split('++')
+                    #     if len(exp) > 0 and exp[0] != '':
+                    #         state[exp[0]] = evaluate(input[0])
+                elif len(input) == 2:
+                    lhs, rhs = input[0].strip(), input[1].strip()
+                    # Ignore cases where there is space in the middle anywhere in LHS since it is not valid
+                    if ' ' not in lhs:
+                        state[lhs] = evaluate(rhs)
+
     # Goes here with there is EOFError or KeyboardInterrupt
     print_output()
 
 except Exception as e:
     # TODO - Check what all exceptions are to be handled
     print("Some error occurred. Please retry. Goodbye!", e)
-
-
-# """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-# for j in range(i, len(exp)):
-#     if exp[j].isalpha():
-#         var += exp[j]
-# if var != "":
-#     if var in state:
-#         increment_list.append(var)
-#     elif var not in state:
-#         state[var] = 0.0
-#         increment_list.append(var)
-# exp = exp[: i - 1] + " " + exp[i + 1:]
-# i -= 1
-# i += 1
