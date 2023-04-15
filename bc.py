@@ -161,13 +161,13 @@ try:
                         output = f"{output}{space}0.0"
                     else:
                         # +\-*/%^
-                        match = re.search('[+|-|*|/|%|^]', var)
+                        match = re.search('[+|\-|*|/|%|^]', var)
                         if match is not None:
                             op = match.group()
                             exp = var.split(op)
                             # Ensure expression is valid
-                            if len(exp) == 2:
-                                substring = evaluate(f'{exp[0].strip()} + {exp[1].strip()}')
+                            if len(exp) > 0:
+                                substring = evaluate(var)
                                 output = f"{output}{space}{substring}"
                 outputs.append(output)
             else:
@@ -190,7 +190,17 @@ try:
 
             else:
                 input = input.split("=", 1)
-                if len(input) == 2:
+                if len(input) == 1 and ('++' in input[0] or '--' in input[0]):
+                    op = '++' if '++' in input[0] else '--'
+                    exp = input[0].split(op)
+                    if len(exp) > 0:
+                        lhs = exp[0] if exp[0] != '' else exp[1]
+                        state[lhs] = evaluate(input[0])
+                    # if '++' in input[0]:
+                    #     exp = input[0].split('++')
+                    #     if len(exp) > 0 and exp[0] != '':
+                    #         state[exp[0]] = evaluate(input[0])
+                elif len(input) == 2:
                     lhs, rhs = input[0].strip(), input[1].strip()
                     # Ignore cases where there is space in the middle anywhere in LHS since it is not valid
                     if ' ' not in lhs:
