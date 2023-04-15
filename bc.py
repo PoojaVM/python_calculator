@@ -5,9 +5,125 @@ outputs = []
 # Holds latest values of variables
 state = {}
 
+increment_list = []
+decrement_list = []
 
 # Evaluates any expression given
+
+
 def evaluate(exp):
+
+    var = ""
+    # ++x
+    if exp[0] == "+" and exp[1] == "+":
+        for j in range(2, len(exp)):
+            if exp[j].isalpha():
+                var += exp[j]
+                if len(exp) > 3 and not exp[j + 1].isalpha():
+                    break
+        if var != "":
+            if var in state:
+                state[var] += 1.0
+                exp = exp.replace(var, str(state[var]), 1)
+                var = ""
+            elif var not in state:
+                state[var] = 1.0
+                exp = exp.replace(var, str(state[var]), 1)
+                var = ""
+        exp = exp[2:]
+
+    if len(exp) >= 3:
+        for i in range(len(exp)):
+            if exp[i - 2] in " /%*^-" and exp[i - 1] == "+" and exp[i] == "+":
+                for j in range(i, len(exp)):
+                    if exp[j].isalpha():
+                        var += exp[j]
+                if var != "":
+                    if var in state:
+                        state[var] += 1.0
+                        exp = exp.replace(var, str(state[var]), 1)
+                    elif var not in state:
+                        state[var] = 1.0
+                        exp = exp.replace(var, str(state[var]), 1)
+                    exp = exp.replace("++", "", 1)
+
+    # --x
+    if exp[0] == "-" and exp[1] == "-":
+        for j in range(2, len(exp)):
+            if exp[j].isalpha():
+                var += exp[j]
+                if len(exp) > 3 and not exp[j + 1].isalpha():
+                    break
+        if var != "":
+            if var in state:
+                state[var] -= 1.0
+                exp = exp.replace(var, str(state[var]), 1)
+                var = ""
+            elif var not in state:
+                state[var] = -1.0
+                exp = exp.replace(var, str(state[var]), 1)
+                var = ""
+        exp = exp[2:]
+
+    if len(exp) >= 3:
+        for i in range(len(exp)):
+            if exp[i - 2] in " /%*^+" and exp[i - 1] == "-" and exp[i] == "-":
+                for j in range(i, len(exp)):
+                    if exp[j].isalpha():
+                        var += exp[j]
+                if var != "":
+                    if var in state:
+                        state[var] -= 1.0
+                        exp = exp.replace(var, str(state[var]), 1)
+                    elif var not in state:
+                        state[var] = -1.0
+                        exp = exp.replace(var, str(state[var]), 1)
+                    exp = exp.replace("++", "", 1)
+
+    # x++
+    if len(exp) >= 3:
+        var = ""
+        for i, s in enumerate(exp):
+            if s.isalpha():
+                var += s
+                if (
+                    len(exp) >= i + 3
+                    and exp[i + 1] == "+"
+                    and exp[i + 2] == "+"
+                    and var != ""
+                ):
+                    if var in state:
+                        exp = exp.replace(var, str(state[var]), 1)
+                        state[var] += 1.0
+                    else:
+                        state[var] = 0.0
+                        exp = exp.replace(var, str(state[var]), 1)
+                        state[var] += 1.0
+                    var = ""
+        exp = exp.replace("++", "")
+
+    # x--
+    if len(exp) >= 3:
+        var = ""
+        for i, s in enumerate(exp):
+            if s.isalpha():
+                var += s
+                if (
+                    len(exp) >= i + 3
+                    and exp[i + 1] == "-"
+                    and exp[i + 2] == "-"
+                    and var != ""
+                ):
+                    if var in state:
+                        exp = exp.replace(var, str(state[var]), 1)
+                        state[var] -= 1.0
+                    else:
+                        state[var] = 0.0
+                        exp = exp.replace(var, str(state[var]), 1)
+                        state[var] -= 1.0
+                    var = ""
+        exp = exp.replace("--", "")
+
     left_count = 0
     right_count = 0
     for e in exp:
@@ -56,8 +172,19 @@ def evaluate_operators(string):
             var_str += s
             continue
         if var_str in state:
-            nums.append(state[var_str])
-            var_str = ""
+            if var_str in increment_list:
+                state[var_str] += 1
+                nums.append(state[var_str])
+                increment_list.remove(var_str)
+                var_str = ""
+            elif var_str in decrement_list:
+                state[var_str] -= 1
+                nums.append(state[var_str])
+                decrement_list.remove(var_str)
+                var_str = ""
+            else:
+                nums.append(state[var_str])
+                var_str = ""
         elif var_str not in state and var_str != "":
             state[var_str] = 0.0
             nums.append(state[var_str])
@@ -84,8 +211,19 @@ def evaluate_operators(string):
                 # Adding all operations to ops list
                 ops.append(s)
     if var_str in state:
-        nums.append(state[var_str])
-        var_str = ""
+        if var_str in increment_list:
+            state[var_str] += 1
+            nums.append(state[var_str])
+            increment_list.remove(var_str)
+            var_str = ""
+        elif var_str in decrement_list:
+            state[var_str] -= 1
+            nums.append(state[var_str])
+            decrement_list.remove(var_str)
+            var_str = ""
+        else:
+            nums.append(state[var_str])
+            var_str = ""
     if var_str not in state and var_str != "":
         state[var_str] = 0.0
         nums.append(state[var_str])
@@ -139,6 +277,7 @@ def print_output():
     for output in outputs:
         print(output)
 
+
 # Driver Code - Takes input from command line and calls functions to process and output it
 try:
     for input in sys.stdin:
@@ -150,7 +289,7 @@ try:
                 output = ""
                 for var in output_vars:
                     var = var.strip()
-                    space = ' ' if output else ''
+                    space = " " if output else ""
                     if var in state:
                         output = f"{output}{space}{state[var]}"
                     elif var.isdigit():
@@ -170,7 +309,7 @@ try:
             elif len(input) == 2:
                 lhs, rhs = input[0].strip(), input[1].strip()
                 # Ignore cases where there is space in the middle anywhere in LHS since it is not valid
-                if ' ' not in lhs:
+                if " " not in lhs:
                     state[lhs] = evaluate(rhs)
     # Goes here with there is EOFError or KeyboardInterrupt
     print_output()
@@ -178,3 +317,18 @@ try:
 except Exception as e:
     # TODO - Check what all exceptions are to be handled
     print("Some error occurred. Please retry. Goodbye!", e)
+
+
+# """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+# for j in range(i, len(exp)):
+#     if exp[j].isalpha():
+#         var += exp[j]
+# if var != "":
+#     if var in state:
+#         increment_list.append(var)
+#     elif var not in state:
+#         state[var] = 0.0
+#         increment_list.append(var)
+# exp = exp[: i - 1] + " " + exp[i + 1:]
+# i -= 1
+# i += 1
