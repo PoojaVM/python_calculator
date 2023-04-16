@@ -6,13 +6,12 @@ outputs = []
 # Holds latest values of variables
 state = {}
 
-increment_list = []
-decrement_list = []
-
 # Evaluates any expression given
 
 
 def evaluate(exp):
+
+    exp = exp.replace(" ", "")
 
     for i in range(len(exp)):
         pass
@@ -31,11 +30,11 @@ def evaluate(exp):
                     var_set.add(token_var)
                     token_var = ""
 
-    var = ""
     while "++" in exp or "--" in exp:
         last_index = 0
         while last_index < len(exp):
             for v in var_set:
+                var = ""
                 if exp[last_index:].startswith(v + "++"):
 
                     if len(exp) >= 3:
@@ -53,13 +52,17 @@ def evaluate(exp):
                                         exp = exp.replace(
                                             var, str(state[var]), 1)
                                         state[var] += 1.0
+                                        var = ""
+                                        exp = exp.replace("++", "", 1)
+                                        break
                                     else:
                                         state[var] = 0.0
                                         exp = exp.replace(
                                             var, str(state[var]), 1)
                                         state[var] += 1.0
-                                    var = ""
-                        exp = exp.replace("++", "", 1)
+                                        var = ""
+                                        exp = exp.replace("++", "", 1)
+                                        break
 
                     last_index += len(var) + 2
                     break
@@ -107,7 +110,8 @@ def evaluate(exp):
                                 exp = exp.replace(var, str(state[var]), 1)
                                 var = ""
                         exp = exp[2:]
-                        continue
+                        break
+
                     if len(exp) >= 3:
                         for i in range(len(exp)):
                             if (
@@ -123,12 +127,17 @@ def evaluate(exp):
                                         state[var] += 1.0
                                         exp = exp.replace(
                                             var, str(state[var]), 1)
+                                        var = ""
+                                        exp = exp.replace("++", "", 1)
+                                        break
                                     elif var not in state:
                                         state[var] = 1.0
                                         exp = exp.replace(
                                             var, str(state[var]), 1)
-                                    var = ""
-                                    exp = exp.replace("++", "", 1)
+                                        var = ""
+                                        exp = exp.replace("++", "", 1)
+                                        break
+
                     last_index += len(var) + 2
                     break
 
@@ -149,7 +158,7 @@ def evaluate(exp):
                                 exp = exp.replace(var, str(state[var]), 1)
                                 var = ""
                         exp = exp[2:]
-                        continue
+                        break
 
                     if len(exp) >= 3:
                         for i in range(len(exp)):
@@ -166,12 +175,16 @@ def evaluate(exp):
                                         state[var] -= 1.0
                                         exp = exp.replace(
                                             var, str(state[var]), 1)
+                                        var = ""
+                                        exp = exp.replace("++", "", 1)
+                                        break
                                     elif var not in state:
                                         state[var] = -1.0
                                         exp = exp.replace(
                                             var, str(state[var]), 1)
-                                    var = ""
-                                    exp = exp.replace("++", "", 1)
+                                        var = ""
+                                        exp = exp.replace("++", "", 1)
+                                        break
                     last_index += len(var) + 2
                     break
             else:
@@ -233,9 +246,10 @@ def evaluate_operators(string):
             nums.append(state[var_str])
             var_str = ""
         # Checking if char encountered is a number
-        if s == "-" and (prev_char in ["(", None] or prev_char in "^/%*-+"):
-            num_str += s
-            continue
+        # if s == "-" and (prev_char in ["(", None] or prev_char in "^/%*-+"):
+        #     num_str += s
+        #     continue
+        #
         # if s.lstrip('-').isdigit():
         #     num_str += "-"
         #     num_str += s
