@@ -11,9 +11,6 @@ state = {}
 
 def evaluate(exp):
 
-    for i in range(len(exp)):
-        pass
-
     token_var = ""
     var_set = set()
     for x in range(len(exp)):
@@ -119,13 +116,15 @@ def evaluate(exp):
                                 state[var] += 1.0
                                 if "++" not in exp and "--" not in exp:
                                     flag = False
-                                exp = exp.replace(var, " " + str(state[var]) + " ", 1)
+                                exp = exp.replace(
+                                    var, " " + str(state[var]) + " ", 1)
                                 var = ""
                             elif var not in state:
                                 state[var] = 1.0
                                 if "++" not in exp and "--" not in exp:
                                     flag = False
-                                exp = exp.replace(var, " " + str(state[var]) + " ", 1)
+                                exp = exp.replace(
+                                    var, " " + str(state[var]) + " ", 1)
                                 var = ""
                         exp = exp[2:]
                         break
@@ -179,13 +178,15 @@ def evaluate(exp):
                                 state[var] -= 1.0
                                 if "++" not in exp and "--" not in exp:
                                     flag = False
-                                exp = exp.replace(var, " " + str(state[var]) + " ", 1)
+                                exp = exp.replace(
+                                    var, " " + str(state[var]) + " ", 1)
                                 var = ""
                             elif var not in state:
                                 state[var] = -1.0
                                 if "++" not in exp and "--" not in exp:
                                     flag = False
-                                exp = exp.replace(var, " " + str(state[var]) + " ", 1)
+                                exp = exp.replace(
+                                    var, " " + str(state[var]) + " ", 1)
                                 var = ""
                         exp = exp[2:]
                         break
