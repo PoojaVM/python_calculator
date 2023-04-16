@@ -14,116 +14,168 @@ decrement_list = []
 
 def evaluate(exp):
 
+    for i in range(len(exp)):
+        pass
+
+    token_var = ""
+    var_set = set()
+    for x in range(len(exp)):
+        if exp[x].isalpha():
+            token_var += exp[x]
+            if x < len(exp) - 1 and not exp[x + 1].isalpha():
+                if token_var in state:
+                    var_set.add(token_var)
+                    token_var = ""
+                elif token_var not in state:
+                    state[token_var] = 0.0
+                    var_set.add(token_var)
+                    token_var = ""
+
     var = ""
-    # ++x
-    if exp[0] == "+" and exp[1] == "+":
-        for j in range(2, len(exp)):
-            if exp[j].isalpha():
-                var += exp[j]
-                if len(exp) > 3 and not exp[j + 1].isalpha():
+    while "++" in exp or "--" in exp:
+        last_index = 0
+        while last_index < len(exp):
+            for v in var_set:
+                if exp[last_index:].startswith(v + "++"):
+
+                    if len(exp) >= 3:
+                        var = ""
+                        for i, s in enumerate(exp):
+                            if s.isalpha():
+                                var += s
+                                if (
+                                    len(exp) >= i + 3
+                                    and exp[i + 1] == "+"
+                                    and exp[i + 2] == "+"
+                                    and var != ""
+                                ):
+                                    if var in state:
+                                        exp = exp.replace(
+                                            var, str(state[var]), 1)
+                                        state[var] += 1.0
+                                    else:
+                                        state[var] = 0.0
+                                        exp = exp.replace(
+                                            var, str(state[var]), 1)
+                                        state[var] += 1.0
+                                    var = ""
+                        exp = exp.replace("++", "", 1)
+
+                    last_index += len(var) + 2
                     break
-        if var != "":
-            if var in state:
-                state[var] += 1.0
-                exp = exp.replace(var, str(state[var]), 1)
-                var = ""
-            elif var not in state:
-                state[var] = 1.0
-                exp = exp.replace(var, str(state[var]), 1)
-                var = ""
-        exp = exp[2:]
 
-    if len(exp) >= 3:
-        for i in range(len(exp)):
-            if exp[i - 2] in " /%*^-" and exp[i - 1] == "+" and exp[i] == "+":
-                for j in range(i, len(exp)):
-                    if exp[j].isalpha():
-                        var += exp[j]
-                if var != "":
-                    if var in state:
-                        state[var] += 1.0
-                        exp = exp.replace(var, str(state[var]), 1)
-                    elif var not in state:
-                        state[var] = 1.0
-                        exp = exp.replace(var, str(state[var]), 1)
-                    exp = exp.replace("++", "", 1)
-
-    # --x
-    if exp[0] == "-" and exp[1] == "-":
-        for j in range(2, len(exp)):
-            if exp[j].isalpha():
-                var += exp[j]
-                if len(exp) > 3 and not exp[j + 1].isalpha():
+                elif exp[last_index:].startswith(v + "--"):
+                    if len(exp) >= 3:
+                        var = ""
+                        for i, s in enumerate(exp):
+                            if s.isalpha():
+                                var += s
+                                if (
+                                    len(exp) >= i + 3
+                                    and exp[i + 1] == "-"
+                                    and exp[i + 2] == "-"
+                                    and var != ""
+                                ):
+                                    if var in state:
+                                        exp = exp.replace(
+                                            var, str(state[var]), 1)
+                                        state[var] -= 1.0
+                                    else:
+                                        state[var] = 0.0
+                                        exp = exp.replace(
+                                            var, str(state[var]), 1)
+                                        state[var] -= 1.0
+                                    var = ""
+                        exp = exp.replace("--", "", 1)
+                    last_index += len(var) + 2
                     break
-        if var != "":
-            if var in state:
-                state[var] -= 1.0
-                exp = exp.replace(var, str(state[var]), 1)
-                var = ""
-            elif var not in state:
-                state[var] = -1.0
-                exp = exp.replace(var, str(state[var]), 1)
-                var = ""
-        exp = exp[2:]
 
-    if len(exp) >= 3:
-        for i in range(len(exp)):
-            if exp[i - 2] in " /%*^+" and exp[i - 1] == "-" and exp[i] == "-":
-                for j in range(i, len(exp)):
-                    if exp[j].isalpha():
-                        var += exp[j]
-                if var != "":
-                    if var in state:
-                        state[var] -= 1.0
-                        exp = exp.replace(var, str(state[var]), 1)
-                    elif var not in state:
-                        state[var] = -1.0
-                        exp = exp.replace(var, str(state[var]), 1)
-                    exp = exp.replace("++", "", 1)
+                elif exp[last_index:].startswith("++" + v):
+                    if exp[0] == "+" and exp[1] == "+":
+                        for j in range(2, len(exp)):
+                            if exp[j].isalpha():
+                                var += exp[j]
+                                if len(exp) > 3 and not exp[j + 1].isalpha():
+                                    break
+                        if var != "":
+                            if var in state:
+                                state[var] += 1.0
+                                exp = exp.replace(var, str(state[var]), 1)
+                                var = ""
+                            elif var not in state:
+                                state[var] = 1.0
+                                exp = exp.replace(var, str(state[var]), 1)
+                                var = ""
+                        exp = exp[2:]
+                        continue
+                    if len(exp) >= 3:
+                        for i in range(len(exp)):
+                            if (
+                                exp[i - 2] in " /%*^-"
+                                and exp[i - 1] == "+"
+                                and exp[i] == "+"
+                            ):
+                                for j in range(i, len(exp)):
+                                    if exp[j].isalpha():
+                                        var += exp[j]
+                                if var != "":
+                                    if var in state:
+                                        state[var] += 1.0
+                                        exp = exp.replace(
+                                            var, str(state[var]), 1)
+                                    elif var not in state:
+                                        state[var] = 1.0
+                                        exp = exp.replace(
+                                            var, str(state[var]), 1)
+                                    var = ""
+                                    exp = exp.replace("++", "", 1)
+                    last_index += len(var) + 2
+                    break
 
-    # x++
-    if len(exp) >= 3:
-        var = ""
-        for i, s in enumerate(exp):
-            if s.isalpha():
-                var += s
-                if (
-                    len(exp) >= i + 3
-                    and exp[i + 1] == "+"
-                    and exp[i + 2] == "+"
-                    and var != ""
-                ):
-                    if var in state:
-                        exp = exp.replace(var, str(state[var]), 1)
-                        state[var] += 1.0
-                    else:
-                        state[var] = 0.0
-                        exp = exp.replace(var, str(state[var]), 1)
-                        state[var] += 1.0
-                    var = ""
-        exp = exp.replace("++", "")
+                elif exp[last_index:].startswith("--" + v):
+                    if exp[0] == "-" and exp[1] == "-":
+                        for j in range(2, len(exp)):
+                            if exp[j].isalpha():
+                                var += exp[j]
+                                if len(exp) > 3 and not exp[j + 1].isalpha():
+                                    break
+                        if var != "":
+                            if var in state:
+                                state[var] -= 1.0
+                                exp = exp.replace(var, str(state[var]), 1)
+                                var = ""
+                            elif var not in state:
+                                state[var] = -1.0
+                                exp = exp.replace(var, str(state[var]), 1)
+                                var = ""
+                        exp = exp[2:]
+                        continue
 
-    # x--
-    if len(exp) >= 3:
-        var = ""
-        for i, s in enumerate(exp):
-            if s.isalpha():
-                var += s
-                if (
-                    len(exp) >= i + 3
-                    and exp[i + 1] == "-"
-                    and exp[i + 2] == "-"
-                    and var != ""
-                ):
-                    if var in state:
-                        exp = exp.replace(var, str(state[var]), 1)
-                        state[var] -= 1.0
-                    else:
-                        state[var] = 0.0
-                        exp = exp.replace(var, str(state[var]), 1)
-                        state[var] -= 1.0
-                    var = ""
-        exp = exp.replace("--", "")
+                    if len(exp) >= 3:
+                        for i in range(len(exp)):
+                            if (
+                                exp[i - 2] in " /%*^+"
+                                and exp[i - 1] == "-"
+                                and exp[i] == "-"
+                            ):
+                                for j in range(i, len(exp)):
+                                    if exp[j].isalpha():
+                                        var += exp[j]
+                                if var != "":
+                                    if var in state:
+                                        state[var] -= 1.0
+                                        exp = exp.replace(
+                                            var, str(state[var]), 1)
+                                    elif var not in state:
+                                        state[var] = -1.0
+                                        exp = exp.replace(
+                                            var, str(state[var]), 1)
+                                    var = ""
+                                    exp = exp.replace("++", "", 1)
+                    last_index += len(var) + 2
+                    break
+            else:
+                last_index += 1
 
     left_count = 0
     right_count = 0
@@ -165,6 +217,7 @@ def evaluate_operators(string):
     ops = []
     num_str = ""
     var_str = ""
+    prev_char = None
     for s in string:
         # Checking if char encountered is a variable
         if s == " ":
@@ -173,24 +226,19 @@ def evaluate_operators(string):
             var_str += s
             continue
         if var_str in state:
-            if var_str in increment_list:
-                state[var_str] += 1
-                nums.append(state[var_str])
-                increment_list.remove(var_str)
-                var_str = ""
-            elif var_str in decrement_list:
-                state[var_str] -= 1
-                nums.append(state[var_str])
-                decrement_list.remove(var_str)
-                var_str = ""
-            else:
-                nums.append(state[var_str])
-                var_str = ""
+            nums.append(state[var_str])
+            var_str = ""
         elif var_str not in state and var_str != "":
             state[var_str] = 0.0
             nums.append(state[var_str])
             var_str = ""
         # Checking if char encountered is a number
+        if s == "-" and (prev_char in ["(", None] or prev_char in "^/%*-+"):
+            num_str += s
+            continue
+        # if s.lstrip('-').isdigit():
+        #     num_str += "-"
+        #     num_str += s
         if s.isdigit() or s == ".":
             num_str += s
         else:
@@ -212,19 +260,8 @@ def evaluate_operators(string):
                 # Adding all operations to ops list
                 ops.append(s)
     if var_str in state:
-        if var_str in increment_list:
-            state[var_str] += 1
-            nums.append(state[var_str])
-            increment_list.remove(var_str)
-            var_str = ""
-        elif var_str in decrement_list:
-            state[var_str] -= 1
-            nums.append(state[var_str])
-            decrement_list.remove(var_str)
-            var_str = ""
-        else:
-            nums.append(state[var_str])
-            var_str = ""
+        nums.append(state[var_str])
+        var_str = ""
     if var_str not in state and var_str != "":
         state[var_str] = 0.0
         nums.append(state[var_str])
@@ -300,7 +337,7 @@ try:
                         output = f"{output}{space}0.0"
                     else:
                         # +\-*/%^
-                        match = re.search('[+|\-|*|/|%|^]', var)
+                        match = re.search("[+|\-|*|/|%|^]", var)
                         if match is not None:
                             op = match.group()
                             exp = var.split(op)
@@ -312,13 +349,13 @@ try:
                 # TODO - Handle case - user passes 'print' without any vars or wrong format
                 pass
         else:
-            temp_input = re.split('[+\-*/%^]=', input)
+            temp_input = re.split("[+\-*/%^]=", input)
             if len(temp_input) == 2:
-                op = input[input.index('=') - 1]
+                op = input[input.index("=") - 1]
                 lhs, rhs = temp_input[0].strip(), temp_input[1].strip()
                 # Ignore cases where there is space in the middle anywhere in LHS since it is not valid
-                if ' ' not in lhs:
-                    state[lhs] = evaluate(f'{lhs} {op} {rhs}')
+                if " " not in lhs:
+                    state[lhs] = evaluate(f"{lhs} {op} {rhs}")
             # TODO - Implement compare extension and handle equal to case
             # elif '=' in input:
             #     # ==, <=, >=, !=, <, >
@@ -328,11 +365,11 @@ try:
 
             else:
                 input = input.split("=", 1)
-                if len(input) == 1 and ('++' in input[0] or '--' in input[0]):
-                    op = '++' if '++' in input[0] else '--'
+                if len(input) == 1 and ("++" in input[0] or "--" in input[0]):
+                    op = "++" if "++" in input[0] else "--"
                     exp = input[0].split(op)
                     if len(exp) > 0:
-                        lhs = exp[0] if exp[0] != '' else exp[1]
+                        lhs = exp[0] if exp[0] != "" else exp[1]
                         evaluate(input[0])
                     # if '++' in input[0]:
                     #     exp = input[0].split('++')
@@ -341,7 +378,7 @@ try:
                 elif len(input) == 2:
                     lhs, rhs = input[0].strip(), input[1].strip()
                     # Ignore cases where there is space in the middle anywhere in LHS since it is not valid
-                    if ' ' not in lhs:
+                    if " " not in lhs:
                         state[lhs] = evaluate(rhs)
 
     # Goes here with there is EOFError or KeyboardInterrupt
