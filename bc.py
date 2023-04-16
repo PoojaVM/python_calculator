@@ -6,8 +6,7 @@ output = ""
 # Holds latest values of variables
 state = {}
 
-increment_list = []
-decrement_list = []
+comment = False
 
 # Evaluates any expression given
 
@@ -282,10 +281,14 @@ def apply_operation(nums, ops):
         nums.append(a + b)
 
 # Checks if variable is valid
+
+
 def is_var_valid(var):
     # TODO - Should var not be capital and underscore?
     return " " not in var and var[0].isalpha() and var.replace("_", "").isalnum() and var.islower()
 # Extension - compare
+
+
 def compare_exp(match, input):
     compare_op = match.group()
     input = input.split(compare_op)
@@ -324,10 +327,26 @@ def compare_exp(match, input):
         # print("parse error")
         # sys.exit()
 
+
 # Driver Code - Takes input from command line and calls functions to process and output it
 try:
     for input in sys.stdin:
         input = " ".join(input.split())
+        # Checking for multi-line comment
+        if comment:
+            # Closing a multi-line commment
+            if "*/" in input:
+                comment = False
+                input = input.split("*/")[1]
+            else:
+                continue
+        # Starting a multi-line comment
+        if "/*" in input:
+            comment = True
+            input = input.split("/*")[0]
+        # Checking for single-line comment
+        if input.startswith("#"):
+            continue
         if "print " in input:
             input = input.split("print ")
             if len(input) == 2 and input[1].strip != "":
@@ -389,7 +408,8 @@ try:
                                 raise
                         # TODO - Handle unary ops
                         elif len(temp_input) == 2:
-                            lhs, rhs = temp_input[0].strip(), temp_input[1].strip()
+                            lhs, rhs = temp_input[0].strip(
+                            ), temp_input[1].strip()
                             if lhs == "" or rhs == "":
                                 raise
                                 # print("parse error")
@@ -403,7 +423,8 @@ try:
                     if is_var_valid(lhs):
                         # Extension - compare
                         if re.search("[==|<=|>=|!=|<|>]", rhs) is not None and re.search("[==|<=|>=|!=|<|>]", rhs).group() != "=":
-                            result = compare_exp(re.search("[==|<=|>=|!=|<|>]", rhs), rhs)
+                            result = compare_exp(
+                                re.search("[==|<=|>=|!=|<|>]", rhs), rhs)
                         else:
                             state[lhs] = evaluate(rhs)
                     else:
