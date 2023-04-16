@@ -1,8 +1,8 @@
 import re
 import sys
 
-# Holds all outputs to print
-outputs = []
+# Hollds all print statements concatenated
+output = ""
 # Holds latest values of variables
 state = {}
 
@@ -10,7 +10,8 @@ state = {}
 
 
 def evaluate(exp):
-
+    if exp == "":
+        raise
     token_var = ""
     var_set = set()
     for x in range(len(exp)):
@@ -237,7 +238,9 @@ def evaluate(exp):
         if e == ")":
             right_count += 1
     if left_count != right_count:
-        return "parse error"
+        raise
+        # print("parse error")
+        # sys.exit()
 
     # Makes sure there are no brackets in the given expression
     if "(" not in exp and ")" not in exp:
@@ -259,7 +262,7 @@ def evaluate(exp):
         curr_string += e
 
     # Evaluating operators of the final expression
-    # XXX - I don't think I need this anymore
+    # XXX - I don"t think I need this anymore
     return evaluate_operators(exp)
 
 
@@ -308,7 +311,9 @@ def evaluate_operators(string):
                     try:
                         apply_operation(nums, ops)
                     except IndexError:
-                        return "parse error"
+                        raise
+                        # print("parse error")
+                        # sys.exit()
                     except ZeroDivisionError:
                         return "divide by zero"
                 # Adding all operations to ops list
@@ -327,7 +332,9 @@ def evaluate_operators(string):
         try:
             apply_operation(nums, ops)
         except IndexError:
-            return "parse error"
+            raise
+            # print("parse error")
+            # sys.exit()
         except ZeroDivisionError:
             return "divide by zero"
     # After all operations performed, return the only element left in the nums list
@@ -364,81 +371,153 @@ def apply_operation(nums, ops):
     elif op == "+":
         nums.append(a + b)
 
+# Checks if variable is valid
 
-# Prints all 'print' statements by user in given sequence
-def print_output():
-    for output in outputs:
-        print(output)
+
+def is_var_valid(var):
+    # TODO - Should var not be capital and underscore?
+    return " " not in var and var[0].isalpha() and var.replace("_", "").isalnum() and var.islower()
+# Extension - compare
+
+
+def compare_exp(match, input):
+    compare_op = match.group()
+    input = input.split(compare_op)
+    if len(input) == 2:
+        lhs, rhs = input[0].strip(), input[1].strip()
+        if lhs.isdigit():
+            lhs = float(lhs)
+        elif is_var_valid(lhs):
+            lhs = 0.0 if lhs not in state else state[lhs]
+        else:
+            raise
+            # print("parse error")
+            # sys.exit()
+        if rhs.isdigit():
+            rhs = float(rhs)
+        elif is_var_valid(rhs):
+            rhs = 0.0 if rhs not in state else state[rhs]
+        else:
+            raise
+            # print("parse error")
+            # sys.exit()
+        if compare_op == "==" and lhs == rhs:
+            return 1.0
+        elif compare_op == ">=" and lhs >= rhs:
+            return 1.0
+        elif compare_op == "<=" and lhs <= rhs:
+            return 1.0
+        elif compare_op == ">" and lhs > rhs:
+            return 1.0
+        elif compare_op == "<" and lhs < rhs:
+            return 1.0
+        else:
+            return 0.0
+    else:
+        raise
+        # print("parse error")
+        # sys.exit()
 
 
 # Driver Code - Takes input from command line and calls functions to process and output it
 try:
     for input in sys.stdin:
         input = " ".join(input.split())
-        if "print" in input:
-            input = input.split(" ", 1)
-            if len(input) == 2:
-                output_vars = input[1].split(",")
+        if "print " in input:
+            input = input.split("print ")
+            if len(input) == 2 and input[1].strip != "":
+                vars = input[1].strip().split(",")
                 output = ""
-                for var in output_vars:
+                for var in vars:
                     var = var.strip()
                     space = " " if output else ""
-                    if var in state:
-                        output = f"{output}{space}{state[var]}"
-                    elif var.isdigit():
+                    # case 1 - print digit: "print 10"
+                    if var.isdigit():
                         output = f"{output}{space}{float(var)}"
-                    elif var.isalpha():
-                        # Not storing in state since we are printing and exiting
-                        output = f"{output}{space}0.0"
-                    else:
-                        # +\-*/%^
-                        match = re.search("[+|\-|*|/|%|^]", var)
-                        if match is not None:
-                            op = match.group()
-                            exp = var.split(op)
-                            # Ensure expression is valid
-                            if len(exp) > 0:
-                                output = f"{output}{space}{evaluate(var)}"
-                outputs.append(output)
+                    # case 2 - print an existing or new var: "print x"
+                    elif is_var_valid(var):
+                        if var == "print":
+                            raise
+                            # print("parse error")
+                            # sys.exit()
+                        substring = "0.0" if var not in state else state[var]
+                        output = f"{output}{space}{substring}"
+                    # case 3 - compare vars or digits: "print x > 4"
+                    elif re.search("[==|<=|>=|!=|<|>]", var) is not None and re.search("[==|<=|>=|!=|<|>]", var).group() != "=":
+                        match = re.search("[==|<=|>=|!=|<|>]", var)
+                        result = compare_exp(match, var)
+                        output = f"{output}{space}{result}"
+                    # case 4 - evaluate in print: "print x + 10"
+                    elif re.search("[+|\-|*|/|%|^]", var) is not None and "=" not in var:
+                        op = re.search("[+|\-|*|/|%|^]", var).group()
+                        output = f"{output}{space}{evaluate(var)}"
             else:
-                # TODO - Handle case - user passes 'print' without any vars or wrong format
+                # TODO - Decide whether to throw parse error or let them continue
                 pass
         else:
-            temp_input = re.split("[+\-*/%^]=", input)
-            if len(temp_input) == 2:
+            # Extension - "op="
+            if len(re.split("[+\-*/%^]=", input)) == 2:
+                temp_input = re.split("[+\-*/%^]=", input)
                 op = input[input.index("=") - 1]
                 lhs, rhs = temp_input[0].strip(), temp_input[1].strip()
                 # Ignore cases where there is space in the middle anywhere in LHS since it is not valid
-                if " " not in lhs:
+                if is_var_valid(lhs):
                     state[lhs] = evaluate(f"{lhs} {op} {rhs}")
-            # TODO - Implement compare extension and handle equal to case
-            # elif '=' in input:
-            #     # ==, <=, >=, !=, <, >
-            #     match = re.search('==|<=|>=|!=|<|>]', var)
-            #     if match is not None:
-            #         com
-
+            # All the other inputs go here
             else:
-                input = input.split("=", 1)
-                if len(input) == 1 and ("++" in input[0] or "--" in input[0]):
-                    op = "++" if "++" in input[0] else "--"
-                    exp = input[0].split(op)
-                    if len(exp) > 0:
-                        lhs = exp[0] if exp[0] != "" else exp[1]
-                        evaluate(input[0])
-                    # if '++' in input[0]:
-                    #     exp = input[0].split('++')
-                    #     if len(exp) > 0 and exp[0] != '':
-                    #         state[exp[0]] = evaluate(input[0])
+                input = input.split("=")
+                if len(input) == 1:
+                    if "++" in input[0] or "--" in input[0]:
+                        op = "++" if "++" in input[0] else "--"
+                        exp = input[0].split(op)
+                        if len(exp) > 0:
+                            lhs = exp[0] if exp[0] != "" else exp[1]
+                            if is_var_valid(lhs):
+                                evaluate(input[0])
+                    else:
+                        temp_input = re.split("[+\-*/%^]", input[0])
+                        if len(temp_input) == 1:
+                            lhs = temp_input[0].strip()
+                            if is_var_valid(lhs):
+                                state[lhs] = 0.0
+                            else:
+                                raise
+                        # TODO - Handle unary ops
+                        elif len(temp_input) == 2:
+                            lhs, rhs = temp_input[0].strip(
+                            ), temp_input[1].strip()
+                            if lhs == "" or rhs == "":
+                                raise
+                                # print("parse error")
+                                # sys.exit()
+                            elif lhs != "" and rhs != "":
+                                result = evaluate(input[0])
+                                if result == "divide by zero":
+                                    print(result)
                 elif len(input) == 2:
                     lhs, rhs = input[0].strip(), input[1].strip()
-                    # Ignore cases where there is space in the middle anywhere in LHS since it is not valid
-                    if " " not in lhs:
-                        state[lhs] = evaluate(rhs)
-
+                    if is_var_valid(lhs):
+                        # Extension - compare
+                        if re.search("[==|<=|>=|!=|<|>]", rhs) is not None and re.search("[==|<=|>=|!=|<|>]", rhs).group() != "=":
+                            result = compare_exp(
+                                re.search("[==|<=|>=|!=|<|>]", rhs), rhs)
+                        else:
+                            state[lhs] = evaluate(rhs)
+                    else:
+                        raise
+                        # print("parse error")
+                        # sys.exit()
+                elif len(input) > 2:
+                    for index in range(len(input) - 1):
+                        var = input[index].strip()
+                        if is_var_valid(var):
+                            raise
+                            # print("parse error")
+                            # sys.exit()
+                        else:
+                            state[var] = evaluate(input[-1])
     # Goes here with there is EOFError or KeyboardInterrupt
-    print_output()
-
+    print(output)
 except Exception as e:
     # TODO - Check what all exceptions are to be handled
-    print("Some error occurred. Please retry. Goodbye!", e)
+    print("parse error")
