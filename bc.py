@@ -21,7 +21,7 @@ def evaluate(exp):
     for x in range(len(exp)):
         if exp[x].isalpha():
             token_var += exp[x]
-            if x < len(exp) - 1 and not exp[x + 1].isalpha():
+            if x == len(exp) - 1 or not exp[x + 1].isalpha():
                 if token_var in state:
                     var_set.add(token_var)
                     token_var = ""
@@ -115,7 +115,7 @@ def evaluate(exp):
                     if len(exp) >= 3:
                         for i in range(len(exp)):
                             if (
-                                exp[i - 2] in " /%*^-"
+                                exp[i - 2] in "+/%*^-"
                                 and exp[i - 1] == "+"
                                 and exp[i] == "+"
                             ):
@@ -163,7 +163,7 @@ def evaluate(exp):
                     if len(exp) >= 3:
                         for i in range(len(exp)):
                             if (
-                                exp[i - 2] in " /%*^+"
+                                exp[i - 2] in "-/%*^+"
                                 and exp[i - 1] == "-"
                                 and exp[i] == "-"
                             ):
@@ -176,14 +176,14 @@ def evaluate(exp):
                                         exp = exp.replace(
                                             var, str(state[var]), 1)
                                         var = ""
-                                        exp = exp.replace("++", "", 1)
+                                        exp = exp.replace("--", "", 1)
                                         break
                                     elif var not in state:
                                         state[var] = -1.0
                                         exp = exp.replace(
                                             var, str(state[var]), 1)
                                         var = ""
-                                        exp = exp.replace("++", "", 1)
+                                        exp = exp.replace("--", "", 1)
                                         break
                     last_index += len(var) + 2
                     break
