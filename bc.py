@@ -28,7 +28,10 @@ def evaluate(exp):
                     var_set.add(token_var)
                     token_var = ""
 
-    while "++" in exp or "--" in exp:
+    flag = True
+    while flag == True:
+        if "++" not in exp and "--" not in exp:
+            flag = False
         last_index = 0
         while last_index < len(exp):
             for v in var_set:
@@ -47,6 +50,8 @@ def evaluate(exp):
                                     and var != ""
                                 ):
                                     if var in state:
+                                        if "++" not in exp and "--" not in exp:
+                                            flag = False
                                         exp = exp.replace(
                                             var, " " + str(state[var]) + " ", 1
                                         )
@@ -56,6 +61,8 @@ def evaluate(exp):
                                         break
                                     else:
                                         state[var] = 0.0
+                                        if "++" not in exp and "--" not in exp:
+                                            flag = False
                                         exp = exp.replace(
                                             var, " " + str(state[var]) + " ", 1
                                         )
@@ -80,12 +87,16 @@ def evaluate(exp):
                                     and var != ""
                                 ):
                                     if var in state:
+                                        if "++" not in exp and "--" not in exp:
+                                            flag = False
                                         exp = exp.replace(
                                             var, " " + str(state[var]) + " ", 1
                                         )
                                         state[var] -= 1.0
                                     else:
                                         state[var] = 0.0
+                                        if "++" not in exp and "--" not in exp:
+                                            flag = False
                                         exp = exp.replace(
                                             var, " " + str(state[var]) + " ", 1
                                         )
@@ -105,11 +116,15 @@ def evaluate(exp):
                         if var != "":
                             if var in state:
                                 state[var] += 1.0
+                                if "++" not in exp and "--" not in exp:
+                                    flag = False
                                 exp = exp.replace(
                                     var, " " + str(state[var]) + " ", 1)
                                 var = ""
                             elif var not in state:
                                 state[var] = 1.0
+                                if "++" not in exp and "--" not in exp:
+                                    flag = False
                                 exp = exp.replace(
                                     var, " " + str(state[var]) + " ", 1)
                                 var = ""
@@ -119,7 +134,7 @@ def evaluate(exp):
                     if len(exp) >= 3:
                         for i in range(len(exp)):
                             if (
-                                exp[i - 2] in " +/%*^-"
+                                exp[i - 2] in " /%*^-"
                                 and exp[i - 1] == "+"
                                 and exp[i] == "+"
                             ):
@@ -129,6 +144,8 @@ def evaluate(exp):
                                 if var != "":
                                     if var in state:
                                         state[var] += 1.0
+                                        if "++" not in exp and "--" not in exp:
+                                            flag = False
                                         exp = exp.replace(
                                             var, " " + str(state[var]) + " ", 1
                                         )
@@ -137,6 +154,8 @@ def evaluate(exp):
                                         break
                                     elif var not in state:
                                         state[var] = 1.0
+                                        if "++" not in exp and "--" not in exp:
+                                            flag = False
                                         exp = exp.replace(
                                             var, " " + str(state[var]) + " ", 1
                                         )
@@ -157,11 +176,15 @@ def evaluate(exp):
                         if var != "":
                             if var in state:
                                 state[var] -= 1.0
+                                if "++" not in exp and "--" not in exp:
+                                    flag = False
                                 exp = exp.replace(
                                     var, " " + str(state[var]) + " ", 1)
                                 var = ""
                             elif var not in state:
                                 state[var] = -1.0
+                                if "++" not in exp and "--" not in exp:
+                                    flag = False
                                 exp = exp.replace(
                                     var, " " + str(state[var]) + " ", 1)
                                 var = ""
@@ -171,7 +194,7 @@ def evaluate(exp):
                     if len(exp) >= 3:
                         for i in range(len(exp)):
                             if (
-                                exp[i - 2] in " -/%*^+"
+                                exp[i - 2] in " /%*^+"
                                 and exp[i - 1] == "-"
                                 and exp[i] == "-"
                             ):
@@ -181,6 +204,8 @@ def evaluate(exp):
                                 if var != "":
                                     if var in state:
                                         state[var] -= 1.0
+                                        if "++" not in exp and "--" not in exp:
+                                            flag = False
                                         exp = exp.replace(
                                             var, " " + str(state[var]) + " ", 1
                                         )
@@ -189,6 +214,8 @@ def evaluate(exp):
                                         break
                                     elif var not in state:
                                         state[var] = -1.0
+                                        if "++" not in exp and "--" not in exp:
+                                            flag = False
                                         exp = exp.replace(
                                             var, " " + str(state[var]) + " ", 1
                                         )
