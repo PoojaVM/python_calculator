@@ -15,6 +15,9 @@ buffer = ""
 
 
 def evaluate(exp):
+    regex = r'-([A-Za-z(])'
+    exp = re.sub(regex, r' -1*\1', exp)
+
     # TODO - Regex not working. Fix
     # match = re.match("^[A-Za-z0-9_()+\-*/%^\s\n]*$", exp)
     # if match is None:
@@ -496,7 +499,7 @@ try:
                 if is_var_valid(lhs) and (is_var_valid(rhs) or rhs.replace('.', '', 1).isdigit()):
                     state[lhs] = evaluate(f"{lhs} {op} {rhs}")
                 else:
-                     raise
+                    raise
             # All the other inputs go here
             else:
                 input = input.split("=")
@@ -534,7 +537,8 @@ try:
                     if is_var_valid(lhs):
                         # Extension - compare
                         if re.search("[==|<=|>=|!=|<|>]", rhs) is not None and re.search("[==|<=|>=|!=|<|>]", rhs).group() != "=":
-                            result = compare_exp(re.search("[==|<=|>=|!=|<|>]", rhs), rhs)
+                            result = compare_exp(
+                                re.search("[==|<=|>=|!=|<|>]", rhs), rhs)
                         elif is_built_in_func(rhs):
                             state[lhs] = eval_built_in_func(rhs)
                         else:
@@ -554,7 +558,7 @@ try:
                         if is_var_valid(var):
                             state[var] = evaluate(input[-1])
                         else:
-                          raise
+                            raise
     # Goes here with there is EOFError or KeyboardInterrupt
     for op in print_outputs:
         print(op)
