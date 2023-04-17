@@ -121,15 +121,13 @@ def evaluate(exp):
                                 state[var] += 1.0
                                 if "++" not in exp and "--" not in exp:
                                     flag = False
-                                exp = exp.replace(
-                                    var, " " + str(state[var]) + " ", 1)
+                                exp = exp.replace(var, " " + str(state[var]) + " ", 1)
                                 var = ""
                             elif var not in state:
                                 state[var] = 1.0
                                 if "++" not in exp and "--" not in exp:
                                     flag = False
-                                exp = exp.replace(
-                                    var, " " + str(state[var]) + " ", 1)
+                                exp = exp.replace(var, " " + str(state[var]) + " ", 1)
                                 var = ""
                         exp = exp[2:]
                         break
@@ -144,7 +142,10 @@ def evaluate(exp):
                                 for j in range(i, len(exp)):
                                     if exp[j].isalpha():
                                         var += exp[j]
-                                        if j == len(exp) or not exp[j + 1].isalpha():
+                                        if (
+                                            j == len(exp) - 1
+                                            or not exp[j + 1].isalpha()
+                                        ):
                                             break
                                 if var != "":
                                     if var in state:
@@ -183,15 +184,13 @@ def evaluate(exp):
                                 state[var] -= 1.0
                                 if "++" not in exp and "--" not in exp:
                                     flag = False
-                                exp = exp.replace(
-                                    var, " " + str(state[var]) + " ", 1)
+                                exp = exp.replace(var, " " + str(state[var]) + " ", 1)
                                 var = ""
                             elif var not in state:
                                 state[var] = -1.0
                                 if "++" not in exp and "--" not in exp:
                                     flag = False
-                                exp = exp.replace(
-                                    var, " " + str(state[var]) + " ", 1)
+                                exp = exp.replace(var, " " + str(state[var]) + " ", 1)
                                 var = ""
                         exp = exp[2:]
                         break
@@ -206,7 +205,10 @@ def evaluate(exp):
                                 for j in range(i, len(exp)):
                                     if exp[j].isalpha():
                                         var += exp[j]
-                                        if j == len(exp) or not exp[j + 1].isalpha():
+                                        if (
+                                            j == len(exp) - 1
+                                            or not exp[j + 1].isalpha()
+                                        ):
                                             break
                                 if var != "":
                                     if var in state:
@@ -501,7 +503,9 @@ try:
                         result = compare_exp(match, var)
                         output = f"{output}{space}{result}"
                     # case 4 - evaluate in print: "print x + 10"
-                    elif re.search("[+|\-|*|/|%|^]", var) is not None and "=" not in var:
+                    elif (
+                        re.search("[+|\-|*|/|%|^]", var) is not None and "=" not in var
+                    ):
                         # TODO - TCs failing with this. For "print a   b". Find fix
                         # temp_var = var.split()
                         # if len(temp_var) > 1:
@@ -547,8 +551,7 @@ try:
                                 raise
                         # TODO - Handle unary ops
                         elif len(temp_input) == 2:
-                            lhs, rhs = temp_input[0].strip(
-                            ), temp_input[1].strip()
+                            lhs, rhs = temp_input[0].strip(), temp_input[1].strip()
                             if lhs == "" or rhs == "":
                                 raise
                                 # print("parse error")
@@ -561,14 +564,22 @@ try:
                     lhs, rhs = input[0].strip(), input[1].strip()
                     if is_var_valid(lhs):
                         # Extension - compare
-                        if re.search("[==|<=|>=|!=|<|>]", rhs) is not None and re.search("[==|<=|>=|!=|<|>]", rhs).group() != "=":
+                        if (
+                            re.search("[==|<=|>=|!=|<|>]", rhs) is not None
+                            and re.search("[==|<=|>=|!=|<|>]", rhs).group() != "="
+                        ):
                             result = compare_exp(
-                                re.search("[==|<=|>=|!=|<|>]", rhs), rhs)
+                                re.search("[==|<=|>=|!=|<|>]", rhs), rhs
+                            )
                         else:
                             temp_rhs = rhs.split()
                             if len(temp_rhs) > 1:
                                 for idx, val in enumerate(temp_rhs):
-                                    if idx < len(temp_rhs) - 1 and val not in ["(", ")"] and temp_rhs[idx+1] == val:
+                                    if (
+                                        idx < len(temp_rhs) - 1
+                                        and val not in ["(", ")"]
+                                        and temp_rhs[idx + 1] == val
+                                    ):
                                         raise
                             state[lhs] = evaluate(rhs)
                     else:
