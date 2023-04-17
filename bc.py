@@ -22,6 +22,7 @@ def evaluate(exp):
     # match = re.match("^[A-Za-z0-9_()+\-*/%^\s\n]*$", exp)
     # if match is None:
     #     raise
+
     var = ""
     # ++x
     if exp[0] == "+" and exp[1] == "+":
@@ -260,7 +261,7 @@ def apply_operation(nums, ops):
     a = nums.pop()
     op = ops.pop()
     if op == "^":
-        nums.append(a**b)
+        nums.append(b**a)
     elif op == "/":
         nums.append(a / b)
     elif op == "%":
@@ -439,8 +440,13 @@ try:
                 continue
 
         # Checking for single-line comment
+        pattern4 = r'^([^#]*)'
         if input.startswith("#"):
             continue
+        elif "#" in input:
+            match = re.search(pattern4, input)
+            input = match.group(1)
+
         if input.startswith("print "):
             input = input.split("print ")
             if len(input) == 2 and input[1].strip != "":
@@ -539,8 +545,10 @@ try:
                         if re.search("[==|<=|>=|!=|<|>]", rhs) is not None and re.search("[==|<=|>=|!=|<|>]", rhs).group() != "=":
                             result = compare_exp(
                                 re.search("[==|<=|>=|!=|<|>]", rhs), rhs)
+
                         elif is_built_in_func(rhs):
                             state[lhs] = eval_built_in_func(rhs)
+                            
                         else:
                             temp_rhs = rhs.split()
                             if len(temp_rhs) > 1:
