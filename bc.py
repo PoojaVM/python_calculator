@@ -261,7 +261,7 @@ def apply_operation(nums, ops):
     a = nums.pop()
     op = ops.pop()
     if op == "^":
-        nums.append(b**a)
+        nums.append(a**b)
     elif op == "/":
         nums.append(a / b)
     elif op == "%":
