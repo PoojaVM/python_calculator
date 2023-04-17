@@ -170,12 +170,14 @@ def evaluate_operators(string):
     ops = []
     num_str = ""
     var_str = ""
+    prev_char = None
     for s in string:
         # Checking if char encountered is a variable
         if s == " ":
             continue
         if s.isalpha():
             var_str += s
+            prev_char = s
             continue
         if var_str in state:
             nums.append(state[var_str])
@@ -185,6 +187,10 @@ def evaluate_operators(string):
             nums.append(state[var_str])
             var_str = ""
         # Checking if char encountered is a number
+        if s == "-" and (prev_char in ["(", None] or prev_char in "^/%*-+"):
+            num_str += s
+            continue
+        prev_char = s
         if s.isdigit() or s == ".":
             num_str += s
         else:
@@ -207,6 +213,8 @@ def evaluate_operators(string):
                         return "divide by zero"
                 # Adding all operations to ops list
                 ops.append(s)
+                prev_char = s
+
     if var_str in state:
         nums.append(state[var_str])
         var_str = ""
