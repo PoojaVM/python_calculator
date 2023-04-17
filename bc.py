@@ -259,7 +259,7 @@ def apply_operation(nums, ops):
     a = nums.pop()
     op = ops.pop()
     if op == "^":
-        nums.append(a**b)
+        nums.append(b**a)
     elif op == "/":
         nums.append(a / b)
     elif op == "%":
@@ -365,8 +365,13 @@ try:
                 continue
 
         # Checking for single-line comment
+        pattern4 = r'^([^#]*)'
         if input.startswith("#"):
             continue
+        elif "#" in input:
+            match = re.search(pattern4, input)
+            input = match.group(1)
+
         if input.startswith("print "):
             input = input.split("print ")
             if len(input) == 2 and input[1].strip != "":
