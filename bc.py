@@ -179,7 +179,7 @@ def evaluate_operators(string):
         # Checking if char encountered is a variable
         if s == " ":
             continue
-        if s.isalpha() or s == "_":
+        if s.isalpha():
             var_str += s
             prev_char = s
             continue
