@@ -7,8 +7,8 @@ print_outputs = []
 # Holds latest values of variables
 state = {}
 
-increment_list = []
-decrement_list = []
+comment = False
+buffer = ""
 
 # Evaluates any expression given
 
@@ -171,32 +171,27 @@ def evaluate_operators(string):
     ops = []
     num_str = ""
     var_str = ""
+    prev_char = None
     for s in string:
         # Checking if char encountered is a variable
         if s == " ":
             continue
         if s.isalpha():
             var_str += s
+            prev_char = s
             continue
         if var_str in state:
-            if var_str in increment_list:
-                state[var_str] += 1
-                nums.append(state[var_str])
-                increment_list.remove(var_str)
-                var_str = ""
-            elif var_str in decrement_list:
-                state[var_str] -= 1
-                nums.append(state[var_str])
-                decrement_list.remove(var_str)
-                var_str = ""
-            else:
-                nums.append(state[var_str])
-                var_str = ""
+            nums.append(state[var_str])
+            var_str = ""
         elif var_str not in state and var_str != "":
             state[var_str] = 0.0
             nums.append(state[var_str])
             var_str = ""
         # Checking if char encountered is a number
+        if s == "-" and (prev_char in ["(", None] or prev_char in "^/%*-+"):
+            num_str += s
+            continue
+        prev_char = s
         if s.isdigit() or s == ".":
             num_str += s
         else:
@@ -219,20 +214,11 @@ def evaluate_operators(string):
                         return "divide by zero"
                 # Adding all operations to ops list
                 ops.append(s)
+                prev_char = s
+
     if var_str in state:
-        if var_str in increment_list:
-            state[var_str] += 1
-            nums.append(state[var_str])
-            increment_list.remove(var_str)
-            var_str = ""
-        elif var_str in decrement_list:
-            state[var_str] -= 1
-            nums.append(state[var_str])
-            decrement_list.remove(var_str)
-            var_str = ""
-        else:
-            nums.append(state[var_str])
-            var_str = ""
+        nums.append(state[var_str])
+        var_str = ""
     if var_str not in state and var_str != "":
         state[var_str] = 0.0
         nums.append(state[var_str])
@@ -282,10 +268,20 @@ def apply_operation(nums, ops):
     elif op == "+":
         nums.append(a + b)
 
+
 # Checks if variable is valid
+
+
 def is_var_valid(var):
     # TODO - Should var not be capital and underscore?
-    return var != "" and " " not in var and var[0].isalpha() and var.replace("_", "").isalnum() and var.islower()
+    return (
+        " " not in var
+        and var[0].isalpha()
+        and var.replace("_", "").isalnum()
+        and var.islower()
+    )
+
+
 # Extension - compare
 def compare_exp(match, input):
     compare_op = match.group()
@@ -325,10 +321,49 @@ def compare_exp(match, input):
         # print("parse error")
         # sys.exit()
 
+
 # Driver Code - Takes input from command line and calls functions to process and output it
 try:
     for input in sys.stdin:
         input = " ".join(input.split())
+
+        pattern = r"/\*.*?\*/"
+        pattern2 = r"^(.*?)\/\*"
+        pattern3 = r"\*\/(.*)$"
+
+        if "/*" in input:  # /*
+            comment = True
+            if input.strip().startswith("/*"):  # /* ----
+                if "*/" in input:  # /* ---- */-?
+                    comment = False
+                    if input.strip().endswith("*/"):  # /* ---- */
+                        # input = ""
+                        continue
+                    else:  # /* ---- */ ----
+                        match = re.search(pattern3, input)
+                        input = match.group(1)
+            else:  # ---/*---
+                if "*/" in input:  # ---/*---*/
+                    comment = False
+                    input = re.sub(pattern, "", input)
+                else:  # ---/*---------V
+                    match = re.search(pattern2, input)
+                    buffer = buffer + match.group(1)
+        if comment:
+            if "*/" in input:
+                comment = False
+                match = re.search(pattern3, input)
+                buffer = buffer + match.group(1)
+                input = buffer
+                buffer = ""
+                if input == "":
+                    continue
+            else:
+                continue
+
+        # Checking for single-line comment
+        if input.startswith("#"):
+            continue
         if input.startswith("print "):
             input = input.split("print ")
             if len(input) == 2 and input[1].strip != "":
@@ -351,7 +386,10 @@ try:
                         substring = "0.0" if var not in state else state[var]
                         output = f"{output}{space}{substring}"
                     # case 3 - compare vars or digits: "print x > 4"
-                    elif re.search("[==|<=|>=|!=|<|>]", var) is not None and re.search("[==|<=|>=|!=|<|>]", var).group() != "=":
+                    elif (
+                        re.search("[==|<=|>=|!=|<|>]", var) is not None
+                        and re.search("[==|<=|>=|!=|<|>]", var).group() != "="
+                    ):
                         match = re.search("[==|<=|>=|!=|<|>]", var)
                         result = compare_exp(match, var)
                         output = f"{output}{space}{result}"
@@ -402,7 +440,8 @@ try:
                                 raise
                         # TODO - Handle unary ops
                         elif len(temp_input) == 2:
-                            lhs, rhs = temp_input[0].strip(), temp_input[1].strip()
+                            lhs, rhs = temp_input[0].strip(
+                            ), temp_input[1].strip()
                             if lhs == "" or rhs == "":
                                 raise
                                 # print("parse error")
