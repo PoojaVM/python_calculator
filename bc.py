@@ -1,5 +1,6 @@
 import re
 import sys
+import math
 
 # Hollds all print statements concatenated
 output = ""
@@ -17,10 +18,10 @@ def evaluate(exp):
     regex = r'-([A-Za-z(])'
     exp = re.sub(regex, r' -1*\1', exp)
 
-    if exp == "":
-        raise
-        # print("parse error")
-        # sys.exit()
+    # TODO - Regex not working. Fix
+    # match = re.match("^[A-Za-z0-9_()+\-*/%^\s\n]*$", exp)
+    # if match is None:
+    #     raise
     var = ""
     # ++x
     if exp[0] == "+" and exp[1] == "+":
@@ -195,7 +196,7 @@ def evaluate_operators(string):
             num_str += s
             continue
         prev_char = s
-        if s.isdigit() or s == ".":
+        if s.replace('.', '', 1).isdigit() or s == ".":
             num_str += s
         else:
             # Adding number to nums list
@@ -277,6 +278,8 @@ def apply_operation(nums, ops):
 
 def is_var_valid(var):
     # TODO - Should var not be capital and underscore?
+    if var == "":
+        return False
     return (
         " " not in var
         and var[0].isalpha()
@@ -291,7 +294,7 @@ def compare_exp(match, input):
     input = input.split(compare_op)
     if len(input) == 2:
         lhs, rhs = input[0].strip(), input[1].strip()
-        if lhs.isdigit():
+        if lhs.replace('.', '', 1).isdigit():
             lhs = float(lhs)
         elif is_var_valid(lhs):
             lhs = 0.0 if lhs not in state else state[lhs]
@@ -299,7 +302,7 @@ def compare_exp(match, input):
             raise
             # print("parse error")
             # sys.exit()
-        if rhs.isdigit():
+        if rhs.replace('.', '', 1).isdigit():
             rhs = float(rhs)
         elif is_var_valid(rhs):
             rhs = 0.0 if rhs not in state else state[rhs]
@@ -324,6 +327,77 @@ def compare_exp(match, input):
         # print("parse error")
         # sys.exit()
 
+# Checks if built in functions are passed
+def is_built_in_func(input):
+    if "min(" in input:
+        exps = input.replace("min(", "").replace(")", "")
+        return f"min {exps}"
+    elif "max(" in input:
+        exps = input.replace("max(", "").replace(")", "")
+        return f"max {exps}"
+    elif "floor(" in input:
+        exps = input.replace("floor(", "").replace(")", "")
+        return f"floor {exps}"
+    elif "ceil(" in input:
+        exps = input.replace("ceil(", "").replace(")", "")
+        return f"ceil {exps}"
+    elif "sqrt(" in input:
+        exps = input.replace("sqrt(", "").replace(")", "")
+        return f"sqrt {exps}"
+    elif "ln(" in input:
+        exps = input.replace("ln(", "").replace(")", "")
+        return f"ln {exps}"
+    elif "read(" in input:
+        exps = input.replace("ln(", "").replace(")", "")
+        return f"read {exps}"
+    return ""
+
+def convert_vars_to_nums(vars):
+    nums = []
+    for var in vars:
+        var = var.strip()
+        if var.replace('.', '', 1).isdigit():
+            nums.append(float(var))
+        elif var in state:
+            nums.append(state[var])
+        else:
+            nums.append(0.0)
+    return nums
+
+# Extension - Build in functions
+def eval_built_in_func(input):
+    input = is_built_in_func(input)
+    func, exps = input.split(" ")
+    vars = exps.split(",")
+    for var in vars:
+        var = var.strip()
+        if not (is_var_valid(var) or var.replace('.', '', 1).isdigit()):
+            raise
+    nums = convert_vars_to_nums(vars)
+    if func == 'min':
+        return min(nums)
+    elif func == 'max':
+        return max(nums)
+    elif func == 'floor':
+        if len(nums) != 1:
+            raise
+        return math.floor(nums[0])
+    elif func == 'ceil':
+        if len(nums) != 1:
+            raise
+        return math.ceil(nums[0])
+    elif func == 'sqrt':
+        if len(nums) != 1:
+            raise
+        return math.sqrt(nums[0])
+    elif func == 'ln':
+        if len(nums) != 1:
+            raise
+        return math.log(nums[0])
+    # TODO - Have to print this irrespective of if it comes with assignment or not. Check validation
+    elif func == 'read':
+        for num in nums:
+            print(num, end = ' ')
 
 # Driver Code - Takes input from command line and calls functions to process and output it
 try:
@@ -333,7 +407,7 @@ try:
         pattern = r"/\*.*?\*/"
         pattern2 = r"^(.*?)\/\*"
         pattern3 = r"\*\/(.*)$"
-
+        # Only do on var assignment or print - 1. print min(1,2), x = min(1,2) + 4
         if "/*" in input:  # /*
             comment = True
             if input.strip().startswith("/*"):  # /* ----
@@ -378,7 +452,7 @@ try:
                     if "divide by zero" in output:
                         break
                     # case 1 - print digit: "print 10"
-                    if var.isdigit():
+                    if var.replace('.', '', 1).isdigit():
                         output = f"{output}{space}{float(var)}"
                     # case 2 - print an existing or new var: "print x"
                     elif is_var_valid(var):
@@ -397,6 +471,9 @@ try:
                         result = compare_exp(match, var)
                         output = f"{output}{space}{result}"
                     # case 4 - evaluate in print: "print x + 10"
+                    elif is_built_in_func(var):
+                        result = eval_built_in_func(var)
+                        output = f"{output}{space}{result}"
                     elif re.search("[+|\-|*|/|%|^]", var) is not None and "=" not in var:
                         # TODO - TCs failing with this. For "print a   b". Find fix
                         # temp_var = var.split()
@@ -406,10 +483,12 @@ try:
                         #             raise
                         op = re.search("[+|\-|*|/|%|^]", var).group()
                         output = f"{output}{space}{evaluate(var)}"
+                    else:
+                        raise
                 print_outputs.append(output)
             else:
                 # TODO - Decide whether to throw parse error or let them continue
-                pass
+                raise
         else:
             # Extension - "op="
             if len(re.split("[+\-*/%^]=", input)) == 2:
@@ -417,7 +496,7 @@ try:
                 op = input[input.index("=") - 1]
                 lhs, rhs = temp_input[0].strip(), temp_input[1].strip()
                 # Ignore cases where there is space in the middle anywhere in LHS since it is not valid
-                if is_var_valid(lhs) and (is_var_valid(rhs) or rhs.isdigit()):
+                if is_var_valid(lhs) and (is_var_valid(rhs) or rhs.replace('.', '', 1).isdigit()):
                     state[lhs] = evaluate(f"{lhs} {op} {rhs}")
                 else:
                     raise
@@ -439,7 +518,7 @@ try:
                             lhs = temp_input[0].strip()
                             if is_var_valid(lhs):
                                 state[lhs] = 0.0
-                            elif lhs != "" and not lhs.isdigit():
+                            elif lhs != "" and not lhs.replace('.', '', 1).isdigit():
                                 raise
                         # TODO - Handle unary ops
                         elif len(temp_input) == 2:
@@ -460,6 +539,8 @@ try:
                         if re.search("[==|<=|>=|!=|<|>]", rhs) is not None and re.search("[==|<=|>=|!=|<|>]", rhs).group() != "=":
                             result = compare_exp(
                                 re.search("[==|<=|>=|!=|<|>]", rhs), rhs)
+                        elif is_built_in_func(rhs):
+                            state[lhs] = eval_built_in_func(rhs)
                         else:
                             temp_rhs = rhs.split()
                             if len(temp_rhs) > 1:
@@ -480,10 +561,9 @@ try:
                             raise
     # Goes here with there is EOFError or KeyboardInterrupt
     for op in print_outputs:
-        if "divide by zero" in op:
-            print(op)
-            sys.exit()
         print(op)
+        if op == "divide by zero":
+            sys.exit()
 except Exception as e:
     # TODO - Check what all exceptions are to be handled
     print("parse error")
