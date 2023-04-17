@@ -16,7 +16,7 @@ buffer = ""
 
 def evaluate(exp):
     regex = r'-([A-Za-z(])'
-    exp = re.sub(regex, r' -1*\1', exp)
+    # exp = re.sub(regex, r' -1*\1', exp)
 
     # TODO - Regex not working. Fix
     # match = re.match("^[A-Za-z0-9_()+\-*/%^\s\n]*$", exp)
@@ -513,7 +513,7 @@ try:
                     if "++" in input[0] or "--" in input[0]:
                         op = "++" if "++" in input[0] else "--"
                         exp = input[0].split(op)
-                        if len(exp) > 0:
+                        if len(exp) > 0 and (exp[0].strip() == "" or exp[1].strip() == ""):
                             if exp[0].strip() != "":
                                 evaluate(exp[0].strip() + op)
                             elif exp[1].strip() != "":
