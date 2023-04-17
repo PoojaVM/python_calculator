@@ -177,19 +177,8 @@ def evaluate_operators(string):
             var_str += s
             continue
         if var_str in state:
-            if var_str in increment_list:
-                state[var_str] += 1
-                nums.append(state[var_str])
-                increment_list.remove(var_str)
-                var_str = ""
-            elif var_str in decrement_list:
-                state[var_str] -= 1
-                nums.append(state[var_str])
-                decrement_list.remove(var_str)
-                var_str = ""
-            else:
-                nums.append(state[var_str])
-                var_str = ""
+            nums.append(state[var_str])
+            var_str = ""
         elif var_str not in state and var_str != "":
             state[var_str] = 0.0
             nums.append(state[var_str])
@@ -218,19 +207,8 @@ def evaluate_operators(string):
                 # Adding all operations to ops list
                 ops.append(s)
     if var_str in state:
-        if var_str in increment_list:
-            state[var_str] += 1
-            nums.append(state[var_str])
-            increment_list.remove(var_str)
-            var_str = ""
-        elif var_str in decrement_list:
-            state[var_str] -= 1
-            nums.append(state[var_str])
-            decrement_list.remove(var_str)
-            var_str = ""
-        else:
-            nums.append(state[var_str])
-            var_str = ""
+        nums.append(state[var_str])
+        var_str = ""
     if var_str not in state and var_str != "":
         state[var_str] = 0.0
         nums.append(state[var_str])
@@ -280,12 +258,20 @@ def apply_operation(nums, ops):
     elif op == "+":
         nums.append(a + b)
 
+
 # Checks if variable is valid
 
 
 def is_var_valid(var):
     # TODO - Should var not be capital and underscore?
-    return " " not in var and var[0].isalpha() and var.replace("_", "").isalnum() and var.islower()
+    return (
+        " " not in var
+        and var[0].isalpha()
+        and var.replace("_", "").isalnum()
+        and var.islower()
+    )
+
+
 # Extension - compare
 
 
@@ -336,11 +322,17 @@ try:
         if comment:
             # Closing a multi-line commment
             if "*/" in input:
+                if input.strip().endswith("*/"):
+                    comment = False
+                    continue
                 comment = False
                 input = input.split("*/")[1]
             else:
                 continue
         # Starting a multi-line comment
+        elif input.strip().startswith("/*"):
+            comment = True
+            continue
         if "/*" in input:
             comment = True
             input = input.split("/*")[0]
@@ -367,12 +359,18 @@ try:
                         substring = "0.0" if var not in state else state[var]
                         output = f"{output}{space}{substring}"
                     # case 3 - compare vars or digits: "print x > 4"
-                    elif re.search("[==|<=|>=|!=|<|>]", var) is not None and re.search("[==|<=|>=|!=|<|>]", var).group() != "=":
+                    elif (
+                        re.search("[==|<=|>=|!=|<|>]", var) is not None
+                        and re.search("[==|<=|>=|!=|<|>]", var).group() != "="
+                    ):
                         match = re.search("[==|<=|>=|!=|<|>]", var)
                         result = compare_exp(match, var)
                         output = f"{output}{space}{result}"
                     # case 4 - evaluate in print: "print x + 10"
-                    elif re.search("[+|\-|*|/|%|^]", var) is not None and "=" not in var:
+                    elif (
+                        re.search("[+|\-|*|/|%|^]",
+                                  var) is not None and "=" not in var
+                    ):
                         op = re.search("[+|\-|*|/|%|^]", var).group()
                         output = f"{output}{space}{evaluate(var)}"
             else:
@@ -422,9 +420,13 @@ try:
                     lhs, rhs = input[0].strip(), input[1].strip()
                     if is_var_valid(lhs):
                         # Extension - compare
-                        if re.search("[==|<=|>=|!=|<|>]", rhs) is not None and re.search("[==|<=|>=|!=|<|>]", rhs).group() != "=":
+                        if (
+                            re.search("[==|<=|>=|!=|<|>]", rhs) is not None
+                            and re.search("[==|<=|>=|!=|<|>]", rhs).group() != "="
+                        ):
                             result = compare_exp(
-                                re.search("[==|<=|>=|!=|<|>]", rhs), rhs)
+                                re.search("[==|<=|>=|!=|<|>]", rhs), rhs
+                            )
                         else:
                             state[lhs] = evaluate(rhs)
                     else:
