@@ -14,6 +14,9 @@ buffer = ""
 
 
 def evaluate(exp):
+    regex = r'-([A-Za-z(])'
+    exp = re.sub(regex, r' -1*\1', exp)
+
     if exp == "":
         raise
         # print("parse error")
@@ -417,7 +420,7 @@ try:
                 if is_var_valid(lhs) and (is_var_valid(rhs) or rhs.isdigit()):
                     state[lhs] = evaluate(f"{lhs} {op} {rhs}")
                 else:
-                     raise
+                    raise
             # All the other inputs go here
             else:
                 input = input.split("=")
@@ -455,7 +458,8 @@ try:
                     if is_var_valid(lhs):
                         # Extension - compare
                         if re.search("[==|<=|>=|!=|<|>]", rhs) is not None and re.search("[==|<=|>=|!=|<|>]", rhs).group() != "=":
-                            result = compare_exp(re.search("[==|<=|>=|!=|<|>]", rhs), rhs)
+                            result = compare_exp(
+                                re.search("[==|<=|>=|!=|<|>]", rhs), rhs)
                         else:
                             temp_rhs = rhs.split()
                             if len(temp_rhs) > 1:
@@ -473,7 +477,7 @@ try:
                         if is_var_valid(var):
                             state[var] = evaluate(input[-1])
                         else:
-                          raise
+                            raise
     # Goes here with there is EOFError or KeyboardInterrupt
     for op in print_outputs:
         if "divide by zero" in op:
