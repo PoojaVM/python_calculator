@@ -677,6 +677,8 @@ try:
                         else:
                             raise
     # Goes here with there is EOFError or KeyboardInterrupt
+    if comment:
+        raise
     for op in print_outputs:
         print(op)
         if op == "divide by zero":
