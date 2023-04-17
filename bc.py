@@ -7,6 +7,7 @@ output = ""
 state = {}
 
 comment = False
+buffer = ""
 
 # Evaluates any expression given
 
@@ -318,24 +319,41 @@ def compare_exp(match, input):
 try:
     for input in sys.stdin:
         input = " ".join(input.split())
-        # Checking for multi-line comment
-        if comment:
-            # Closing a multi-line commment
-            if "*/" in input:
-                if input.strip().endswith("*/"):
+
+        pattern = r"/\*.*?\*/"
+        pattern2 = r"^(.*?)\/\*"
+        pattern3 = r"\*\/(.*)$"
+
+        if "/*" in input:  # /*
+            comment = True
+            if input.strip().startswith("/*"):  # /* ----
+                if "*/" in input:  # /* ---- */-?
                     comment = False
-                    continue
+                    if input.strip().endswith("*/"):  # /* ---- */
+                        # input = ""
+                        continue
+                    else:  # /* ---- */ ----
+                        match = re.search(pattern3, input)
+                        input = match.group(1)
+            else:  # ---/*---
+                if "*/" in input:  # ---/*---*/
+                    comment = False
+                    input = re.sub(pattern, "", input)
+                else:  # ---/*---------V
+                    match = re.search(pattern2, input)
+                    buffer = buffer + match.group(1)
+        if comment:
+            if "*/" in input:
                 comment = False
-                input = input.split("*/")[1]
+                match = re.search(pattern3, input)
+                buffer = buffer + match.group(1)
+                input = buffer
+                buffer = ""
+                if input == "":
+                    continue
             else:
                 continue
-        # Starting a multi-line comment
-        elif input.strip().startswith("/*"):
-            comment = True
-            continue
-        if "/*" in input:
-            comment = True
-            input = input.split("/*")[0]
+
         # Checking for single-line comment
         if input.startswith("#"):
             continue
