@@ -631,6 +631,10 @@ try:
                                 evaluate(exp[0].strip() + op)
                             elif exp[1].strip() != "":
                                 evaluate(op + exp[1].strip())
+                        else:
+                            raise
+                    elif re.search("(==|<=|>=|!=|<|>)", input[0]) is not None:
+                        compare_exp(re.search("(==|<=|>=|!=|<|>)", input[0]), input[0])
                     else:
                         temp_input = re.split("[+\-*/%^]", input[0])
                         if len(temp_input) == 1:
