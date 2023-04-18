@@ -398,35 +398,36 @@ def compare_exp(match, input):
     compare_op = match.group()
     input = input.split(compare_op)
     if len(input) == 2:
-        lhs, rhs = input[0].strip(), input[1].strip()
-        if lhs.replace('.', '', 1).isdigit():
-            lhs = float(lhs)
-        elif is_var_valid(lhs):
-            lhs = 0.0 if lhs not in state else state[lhs]
-        else:
-            raise
-            # print("parse error")
-            # sys.exit()
-        if rhs.replace('.', '', 1).isdigit():
-            rhs = float(rhs)
-        elif is_var_valid(rhs):
-            rhs = 0.0 if rhs not in state else state[rhs]
-        else:
-            raise
-            # print("parse error")
-            # sys.exit()
+        # lhs, rhs = input[0].strip(), input[1].strip()
+        if "(" in input[0] and ")" in input[1]:
+            input[0] = input[0].strip().replace('(', '')
+            input[1] = input[1].strip().replace(')', '')
+        lhs = evaluate(input[0])
+        rhs = evaluate(input[1])
+        # if lhs.replace('.', '', 1).isdigit():
+        #     lhs = float(lhs)
+        # elif is_var_valid(lhs):
+        #     lhs = 0.0 if lhs not in state else state[lhs]
+        # else:
+        #     raise
+        # if rhs.replace('.', '', 1).isdigit():
+        #     rhs = float(rhs)
+        # elif is_var_valid(rhs):
+        #     rhs = 0.0 if rhs not in state else state[rhs]
+        # else:
+        #     raise
         if compare_op == "==" and lhs == rhs:
-            return 1.0
+            return  
         elif compare_op == ">=" and lhs >= rhs:
-            return 1.0
+            return 1
         elif compare_op == "<=" and lhs <= rhs:
-            return 1.0
+            return 1
         elif compare_op == ">" and lhs > rhs:
-            return 1.0
+            return 1
         elif compare_op == "<" and lhs < rhs:
-            return 1.0
+            return 1
         else:
-            return 0.0
+            return 0
     else:
         raise
         # print("parse error")
@@ -461,7 +462,10 @@ def convert_vars_to_nums(vars):
     nums = []
     for var in vars:
         var = var.strip()
-        if var.replace('.', '', 1).isdigit():
+        if var.replace('.', '', 1).replace('-', '', 1).replace('+', '', 1).isdigit():
+            num = float(var)
+            if "-" in var:
+                num = num * -1
             nums.append(float(var))
         elif var in state:
             nums.append(state[var])
@@ -476,7 +480,7 @@ def eval_built_in_func(input):
     vars = exps.split(",")
     for var in vars:
         var = var.strip()
-        if not (is_var_valid(var) or var.replace('.', '', 1).isdigit()):
+        if not (is_var_valid(var) or var.replace('.', '', 1).replace('-', '', 1).replace('+', '', 1).isdigit()):
             raise
     nums = convert_vars_to_nums(vars)
     if func == 'min':
@@ -602,6 +606,7 @@ try:
                             #             raise
                             op = re.search("(\+|\-|\*|\/|\%|\^)", var).group()
                             output = f"{output}{space}{evaluate(var)}"
+                                    # Extension - "op="
                         else:
                             raise
                 print_outputs.append(output)
