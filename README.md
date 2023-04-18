@@ -52,9 +52,9 @@ We handled it by updating the `while loop` condition which was making it go to i
     ```
 Above commands prints `1.0` on exit since comparison is `True`.
 
-### 3.Comments Extension
+### 3. Comments Extension
 
-### Extension 4 - Built-in Functions Extensions
+### 4. Built-in Functions Extensions
 1. Support for built-in functions is added as the last extension.
 2. Example
     ```

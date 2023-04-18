@@ -15,7 +15,6 @@ buffer = ""
 
 
 def evaluate(exp):
-
     if exp == "":
         raise
     token_var = ""
