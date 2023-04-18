@@ -476,7 +476,7 @@ def convert_vars_to_nums(vars):
 # Extension - Build in functions
 def eval_built_in_func(input):
     input = is_built_in_func(input)
-    func, exps = input.split()
+    func, exps = input.split(" ", 1)
     vars = exps.split(",")
     for var in vars:
         var = var.strip()
