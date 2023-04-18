@@ -417,7 +417,9 @@ def compare_exp(match, input):
         # else:
         #     raise
         if compare_op == "==" and lhs == rhs:
-            return  
+            return 1
+        elif compare_op == "!=" and lhs != rhs:
+            return 1
         elif compare_op == ">=" and lhs >= rhs:
             return 1
         elif compare_op == "<=" and lhs <= rhs:
@@ -618,9 +620,9 @@ try:
             if len(re.split("[\+\-\*\/\%\^]=", input)) == 2:
                 temp_input = re.split("[+\-*/%^]=", input)
                 op = input[input.index("=") - 1]
-                lhs, rhs = temp_input[0].strip(), temp_input[1].strip()
+                lhs, rhs = temp_input[0].strip(), evaluate(temp_input[1].strip())
                 # Ignore cases where there is space in the middle anywhere in LHS since it is not valid
-                if is_var_valid(lhs) and (is_var_valid(rhs) or rhs.replace('.', '', 1).isdigit()):
+                if is_var_valid(lhs):
                     state[lhs] = evaluate(f"{lhs} {op} {rhs}")
                 else:
                     raise

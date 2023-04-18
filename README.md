@@ -19,7 +19,7 @@ Pooja - 40 hours, Nouman - 40 hours
 
 ## Any bugs or issues you could not resolve
 We have not seen any issues as such that we could not fix.
-But the autograder still showed some issues with cases related to precedence. We tried different flows to fix those.
+But the autograder still showed some issues with couple of cases related to error and assignment. We tried different flows to fix those.
 
 ## An example of a difficult bug which you resolved
 Issue - We had an infinite loop in our program which was happening only for some expressions.
@@ -31,12 +31,30 @@ We handled it by updating the `while loop` condition which was making it go to i
 1. All the operations provided are supported by this extension.
 2. Example -
     ```
-    >>> a = 4
-    >>> b = 4
-    >>> b += a
-    >>> print b
+   >>> a = 10
+   >>> b = 5
+   >>> a += b
+   >>> print a
+   >>> z = 10
+   >>> z *= 2
+   >>> print z
+   >>> q -= 9
+   >>> print q
+   >>> h = 14
+   >>> h /= 7
+   >>> print h
+   >>> xz = 2
+   >>> xz ^= 2
+   >>> print xz
     ```
-    Above commands print result as `8.0` on exit.
+    Above commands print result as follows on exit.
+    ```
+    15.0
+    20.0
+    -9.0
+    2.0
+    4.0
+    ```
 3. Arbitrary spaces are allowed in this expression as long as there are no spaces in `op=` <br>
 <nbsp> Valid input example: `x      +=    5` <br>
 <nbsp> Invalid input example: `x +  = 5`
@@ -46,11 +64,26 @@ We handled it by updating the `while loop` condition which was making it go to i
 1. All types of comparisons can be done with both digits and variables.
 2. Example -
     ```
-    >>> x = 5
-    >>> z = x > 3
-    >>> print z
+    >>> print 5 > 6
+    >>> x = 10
+    >>> y = 10
+    >>> print x == y
+    >>> print -1 < 4
+    >>> print 3 >= 3
+    >>> print 9 <= 23
+    >>> print 10 != 10
     ```
-Above commands prints `1.0` on exit since comparison is `True`.
+    Above input will provide output on exit as
+    ```
+    0
+    1
+    1
+    1
+    1
+    0
+    ```
+3. Compare prints `1` if result is `True`. Otherwise, it prints `0`
+4. Comparison can also be assigned to a new variable like `x = 5 > 10` which yeilds `0`
 
 ### 3. Comments Extension
 1. Single Line Comments:
@@ -97,11 +130,18 @@ Above commands prints `1.0` on exit since comparison is `True`.
 2. Example
     ```
     >>> print min(4, 5)
-    >>> x = floor(5.9)
-    >>> print x
+    >>> print max(-4,   5)
+    >>> print floor(5.9)
+    >>> print ceil(3.3)
+    >>> print ln(10)
+    >>> print sqrt(49)
     ```
     Above input will print following on exit
     ```
     4.0
+    5.0
     5
+    4
+    2.302585092994046
+    7.0
     ```
