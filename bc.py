@@ -121,15 +121,13 @@ def evaluate(exp):
                             state[var] += 1.0
                             if "++" not in exp and "--" not in exp:
                                 flag = False
-                            exp = exp.replace(
-                                var, " " + str(state[var]) + " ", 1)
+                            exp = exp.replace(var, " " + str(state[var]) + " ", 1)
                             var = ""
                         elif var not in state:
                             state[var] = 1.0
                             if "++" not in exp and "--" not in exp:
                                 flag = False
-                            exp = exp.replace(
-                                var, " " + str(state[var]) + " ", 1)
+                            exp = exp.replace(var, " " + str(state[var]) + " ", 1)
                             var = ""
                     exp = exp[2:]
                     break
@@ -186,15 +184,13 @@ def evaluate(exp):
                             state[var] -= 1.0
                             if "++" not in exp and "--" not in exp:
                                 flag = False
-                            exp = exp.replace(
-                                var, " " + str(state[var]) + " ", 1)
+                            exp = exp.replace(var, " " + str(state[var]) + " ", 1)
                             var = ""
                         elif var not in state:
                             state[var] = -1.0
                             if "++" not in exp and "--" not in exp:
                                 flag = False
-                            exp = exp.replace(
-                                var, " " + str(state[var]) + " ", 1)
+                            exp = exp.replace(var, " " + str(state[var]) + " ", 1)
                             var = ""
                     exp = exp[2:]
                     break
@@ -437,8 +433,6 @@ def compare_exp(match, input):
         # sys.exit()
 
 # Checks if built in functions are passed
-
-
 def is_built_in_func(input):
     if "min(" in input:
         exps = input.replace("min(", "").replace(")", "")
@@ -463,7 +457,6 @@ def is_built_in_func(input):
         return f"read {exps}"
     return ""
 
-
 def convert_vars_to_nums(vars):
     nums = []
     for var in vars:
@@ -477,11 +470,9 @@ def convert_vars_to_nums(vars):
     return nums
 
 # Extension - Build in functions
-
-
 def eval_built_in_func(input):
     input = is_built_in_func(input)
-    func, exps = input.split(" ")
+    func, exps = input.split()
     vars = exps.split(",")
     for var in vars:
         var = var.strip()
@@ -511,8 +502,7 @@ def eval_built_in_func(input):
     # TODO - Have to print this irrespective of if it comes with assignment or not. Check validation
     elif func == 'read':
         for num in nums:
-            print(num, end=' ')
-
+            print(num, end = ' ')
 
 # Driver Code - Takes input from command line and calls functions to process and output it
 try:
@@ -566,55 +556,61 @@ try:
             if len(input) == 2 and input[1].strip != "":
                 vars = input[1].strip().split(",")
                 output = ""
+                func_processed = False
                 for var in vars:
-                    var = var.strip()
                     space = " " if output else ""
-                    if "divide by zero" in output:
-                        break
-                    # case 1 - print digit: "print 10"
-                    if var.replace('.', '', 1).isdigit():
-                        output = f"{output}{space}{float(var)}"
-                    # case 2 - print an existing or new var: "print x"
-                    elif is_var_valid(var):
-                        if var == "print":
-                            raise
-                            # print("parse error")
-                            # sys.exit()
-                        substring = "0.0" if var not in state else state[var]
-                        output = f"{output}{space}{substring}"
-                    # case 3 - compare vars or digits: "print x > 4"
-                    elif (
-                        re.search("[==|<=|>=|!=|<|>]", var) is not None
-                        and re.search("[==|<=|>=|!=|<|>]", var).group() != "="
-                    ):
-                        match = re.search("[==|<=|>=|!=|<|>]", var)
-                        result = compare_exp(match, var)
+                    if "min(" in var or "max(" in var:
+                        func = "min" if "min" in var else "max"
+                        result = eval_built_in_func(f"{var},{vars[vars.index(var) + 1]}")
                         output = f"{output}{space}{result}"
-                    # case 4 - evaluate in print: "print x + 10"
-                    elif is_built_in_func(var):
-                        result = eval_built_in_func(var)
-                        output = f"{output}{space}{result}"
-                    elif (
-                        re.search("[+|\-|*|/|%|^]",
-                                  var) is not None and "=" not in var
-                    ):
-                        # TODO - TCs failing with this. For "print a   b". Find fix
-                        # temp_var = var.split()
-                        # if len(temp_var) > 1:
-                        #     for idx, val in enumerate(temp_var):
-                        #         if idx < len(temp_rhs) - 1 and val not in ["(", ")"] and temp_var[idx+1] == val:
-                        #             raise
-                        op = re.search("[+|\-|*|/|%|^]", var).group()
-                        output = f"{output}{space}{evaluate(var)}"
+                        func_processed = True
                     else:
-                        raise
+                        if func_processed:
+                            func_processed = False
+                            continue
+                        var = var.strip()
+                        if "divide by zero" in output:
+                            break
+                        # case 1 - print digit: "print 10"
+                        if var.replace('.', '', 1).isdigit():
+                            output = f"{output}{space}{float(var)}"
+                        # case 2 - print an existing or new var: "print x"
+                        elif is_var_valid(var):
+                            if var == "print":
+                                raise
+                                # print("parse error")
+                                # sys.exit()
+                            substring = "0.0" if var not in state else state[var]
+                            output = f"{output}{space}{substring}"
+                        # case 3 - compare vars or digits: "print x > 4"
+                        elif re.search("(==|<=|>=|!=|<|>)", var) is not None:
+                            match = re.search("(==|<=|>=|!=|<|>)", var)
+                            result = compare_exp(match, var)
+                            output = f"{output}{space}{result}"
+                        # case 4 - evaluate in print: "print x + 10"
+                        elif is_built_in_func(var):
+                            result = eval_built_in_func(var)
+                            output = f"{output}{space}{result}"
+                        elif (
+                            re.search("(\+|\-|\*|\/|\%|\^)", var) is not None and "=" not in var
+                        ):
+                            # TODO - TCs failing with this. For "print a   b". Find fix
+                            # temp_var = var.split()
+                            # if len(temp_var) > 1:
+                            #     for idx, val in enumerate(temp_var):
+                            #         if idx < len(temp_rhs) - 1 and val not in ["(", ")"] and temp_var[idx+1] == val:
+                            #             raise
+                            op = re.search("(\+|\-|\*|\/|\%|\^)", var).group()
+                            output = f"{output}{space}{evaluate(var)}"
+                        else:
+                            raise
                 print_outputs.append(output)
             else:
                 # TODO - Decide whether to throw parse error or let them continue
                 raise
         else:
             # Extension - "op="
-            if len(re.split("[+\-*/%^]=", input)) == 2:
+            if len(re.split("[\+\-\*\/\%\^]=", input)) == 2:
                 temp_input = re.split("[+\-*/%^]=", input)
                 op = input[input.index("=") - 1]
                 lhs, rhs = temp_input[0].strip(), temp_input[1].strip()
@@ -625,7 +621,7 @@ try:
                     raise
             # All the other inputs go here
             else:
-                input = input.split("=")
+                input = input.split("=", 1)
                 if len(input) == 1:
                     if "++" in input[0] or "--" in input[0]:
                         op = "++" if "++" in input[0] else "--"
@@ -635,6 +631,10 @@ try:
                                 evaluate(exp[0].strip() + op)
                             elif exp[1].strip() != "":
                                 evaluate(op + exp[1].strip())
+                        else:
+                            raise
+                    elif re.search("(==|<=|>=|!=|<|>)", input[0]) is not None:
+                        compare_exp(re.search("(==|<=|>=|!=|<|>)", input[0]), input[0])
                     else:
                         temp_input = re.split("[+\-*/%^]", input[0])
                         if len(temp_input) == 1:
@@ -645,8 +645,7 @@ try:
                                 raise
                         # TODO - Handle unary ops
                         elif len(temp_input) == 2:
-                            lhs, rhs = temp_input[0].strip(
-                            ), temp_input[1].strip()
+                            lhs, rhs = temp_input[0].strip(), temp_input[1].strip()
                             if lhs == "" or rhs == "":
                                 raise
                                 # print("parse error")
@@ -659,12 +658,14 @@ try:
                     lhs, rhs = input[0].strip(), input[1].strip()
                     if is_var_valid(lhs):
                         # Extension - compare
-                        if re.search("[==|<=|>=|!=|<|>]", rhs) is not None and re.search("[==|<=|>=|!=|<|>]", rhs).group() != "=":
+                        if re.search("(==|<=|>=|!=|<|>)", rhs) is not None:
                             result = compare_exp(
-                                re.search("[==|<=|>=|!=|<|>]", rhs), rhs)
+                                re.search("(==|<=|>=|!=|<|>)", rhs), rhs)
+                            state[lhs] = result
 
                         elif is_built_in_func(rhs):
                             state[lhs] = eval_built_in_func(rhs)
+
                         else:
                             temp_rhs = rhs.split()
                             if len(temp_rhs) > 1:
@@ -678,16 +679,16 @@ try:
                             state[lhs] = evaluate(rhs)
                     else:
                         raise
-                        # print("parse error")
-                        # sys.exit()
-                elif len(input) > 2:
-                    for index in range(len(input) - 1):
-                        var = input[index].strip()
-                        if is_var_valid(var):
-                            state[var] = evaluate(input[-1])
-                        else:
-                            raise
-    # Goes here with there is EOFError or KeyboardInterrupt
+                else:
+                    raise
+                # elif len(input) > 2:
+                #     for index in range(len(input) - 1):
+                #         var = input[index].strip()
+                #         if is_var_valid(var):
+                #             state[var] = evaluate(input[-1])
+                #         else:
+                #             raise
+    # Goes here on EOFError
     if comment:
         raise
     for op in print_outputs:
