@@ -53,6 +53,44 @@ We handled it by updating the `while loop` condition which was making it go to i
 Above commands prints `1.0` on exit since comparison is `True`.
 
 ### 3. Comments Extension
+1. Single Line Comments:
+    - Single Line comments are made using `#`.
+    - Anything written in a line after a `#` is ignored by the parser.
+    ```
+    >>> # Addition Example
+    >>> x = 1
+    >>> y = 2
+    >>> print x + y # Output
+    ```
+2. Multi Line Comments:
+    - Multi Line comments can be used over multiple lines.
+    - Comments are written between `/*` and `*/`.
+    ```
+    >>> x = 1
+    >>> /* 
+    >>> x = 5
+    >>> */
+    >>> print x
+    >>> 0.0
+    ```
+    ```
+    >>> x = /* 
+    >>> This is a comment
+    >>> */ 20 + 30
+    >>> print x
+    >>> 50.0
+    ```
+    ```
+    >>> x = /* Comment */ 5
+    >>> print x
+    >>> 5.0
+    ```
+    - You get a `parse error` if you do not close a multi line comment.
+    - It does not work in cases where there is no new line separating two statements. This also gives a `parser error`:
+    ```
+    >>> x = 5 /* This is
+    >>> a comment */ y = 10
+    ```
 
 ### 4. Built-in Functions Extensions
 1. Support for built-in functions is added as the last extension.
